@@ -3,6 +3,7 @@ import "./App.css";
 import Footer from "./components/common/Footer";
 import Navbar from "./components/common/Navbar";
 import Home from "./pages/Home";
+import POS from "./pages/POS";
 
 const MainFunction = () => {
   return (
@@ -17,7 +18,10 @@ const MainFunction = () => {
 const router = createBrowserRouter([
   {
     element: <MainFunction />,
-    children: [{ path: "", element: <Home /> }],
+    children: [
+      { path: "", element: <Home /> },
+      { path: "/pos", element: <POS /> },
+    ],
   },
 ]);
 
