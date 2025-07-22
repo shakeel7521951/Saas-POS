@@ -3,6 +3,8 @@ import "./App.css";
 import Footer from "./components/common/Footer";
 import Navbar from "./components/common/Navbar";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import POS from "./pages/POS";
 
 const MainFunction = () => {
@@ -23,6 +25,8 @@ const router = createBrowserRouter([
       { path: "/pos", element: <POS /> },
     ],
   },
+  { path: "/login", element: <Login /> },
+  { path: "/signup", element: <Signup /> },
 ]);
 
 function App() {
