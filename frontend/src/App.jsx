@@ -31,10 +31,11 @@ const router = createBrowserRouter([
     element: <MainFunction />,
     children: [
       { path: "", element: <HomePage /> },
+      { path: "dashboard", element: <HomePage /> },
       { path: "/products", element: <ProductTabs /> },
       { path: "/categories", element: <Category /> },
       { path: "/brands", element: <Brands /> },
-      { path: "/ware-houses", element: <Warehouses /> },
+      { path: "/warehouses", element: <Warehouses /> },
       { path: "/accounting/accounts", element: <Accounts /> },
       { path: "/accounting/money-transfer", element: <MoneyTransfer /> },
       { path: "/accounting/balance-sheet", element: <BalanceSheet /> },
