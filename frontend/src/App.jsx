@@ -1,12 +1,17 @@
-// App.js
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import "./App.css";
-import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import POS from "./pages/POS";
 import Sidebar from "./components/pos/Sidebar";
 import ProductTabs from "./components/pos/ProductTabs";
+import Category from "./pages/Category";
+import Brands from "./pages/Brands";
+import Warehouses from "./pages/Warehouses";
+import Accounts from "./pages/Accounts";
+import MoneyTransfer from "./pages/MoneyTransfer";
+import BalanceSheet from "./pages/BalanceSheet";
+import HomePage from "./pages/Homepage";
 
 const MainFunction = () => {
   return (
@@ -25,8 +30,14 @@ const router = createBrowserRouter([
   {
     element: <MainFunction />,
     children: [
-      { path: "", element: <Home /> },
-      { path: "/pos", element: <ProductTabs /> },
+      { path: "", element: <HomePage /> },
+      { path: "/products", element: <ProductTabs /> },
+      { path: "/categories", element: <Category /> },
+      { path: "/brands", element: <Brands /> },
+      { path: "/ware-houses", element: <Warehouses /> },
+      { path: "/accounting/accounts", element: <Accounts /> },
+      { path: "/accounting/money-transfer", element: <MoneyTransfer /> },
+      { path: "/accounting/balance-sheet", element: <BalanceSheet /> },
     ],
   },
   { path: "/login", element: <Login /> },
