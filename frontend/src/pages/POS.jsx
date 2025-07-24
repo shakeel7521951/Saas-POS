@@ -1,47 +1,11 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import Sidebar from "../components/pos/Sidebar";
 import ProductTabs from "../components/pos/ProductTabs";
-import Checkout from "../components/pos/Checkout";
-import { Menu, X, ShoppingCart } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 const POS = () => {
   const [selectedCompany, setSelectedCompany] = useState("Company A");
-  const [cartItems, setCartItems] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-
-  const addToCart = (product) => {
-    const existingItem = cartItems.find((item) => item.id === product.id);
-    if (existingItem) {
-      setCartItems(
-        cartItems.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      );
-    } else {
-      setCartItems([...cartItems, { ...product, quantity: 1 }]);
-    }
-  };
-
-  const updateQuantity = (id, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(id);
-    } else {
-      setCartItems(
-        cartItems.map((item) => (item.id === id ? { ...item, quantity } : item))
-      );
-    }
-  };
-
-  const removeFromCart = (id) => {
-    setCartItems(cartItems.filter((item) => item.id !== id));
-  };
-
-  const clearCart = () => {
-    setCartItems([]);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -54,7 +18,7 @@ const POS = () => {
           <Menu size={24} />
         </button>
         <h1 className="text-lg font-semibold text-gray-800">POS System</h1>
-        <button
+        {/* <button
           onClick={() => setIsCheckoutOpen(true)}
           className="relative p-2 rounded-md text-gray-600 hover:bg-gray-100"
         >
@@ -66,7 +30,7 @@ const POS = () => {
               </span>
             )}
           </div>
-        </button>
+        </button> */}
       </div>
 
       <div className="flex h-screen lg:h-[calc(100vh-0px)] overflow-hidden">
@@ -111,42 +75,7 @@ const POS = () => {
           />
         </div>
 
-        {/* Mobile Checkout Overlay */}
-        {isCheckoutOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <div
-              className="fixed inset-0 bg-black opacity-50"
-              onClick={() => setIsCheckoutOpen(false)}
-            ></div>
-            <div className="fixed right-0 top-0 h-full w-full sm:w-96 bg-white shadow-xl z-60">
-              <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="text-lg font-semibold">Checkout</h2>
-                <button
-                  onClick={() => setIsCheckoutOpen(false)}
-                  className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-              <Checkout
-                cartItems={cartItems}
-                onUpdateQuantity={updateQuantity}
-                onRemoveItem={removeFromCart}
-                onClearCart={clearCart}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Desktop Checkout */}
-        <div className="hidden lg:block w-80 xl:w-96 bg-white border-l border-gray-200 shadow-lg">
-          <Checkout
-            cartItems={cartItems}
-            onUpdateQuantity={updateQuantity}
-            onRemoveItem={removeFromCart}
-            onClearCart={clearCart}
-          />
-        </div>
+        
       </div>
     </div>
   );

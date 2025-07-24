@@ -1,3 +1,4 @@
+// Sidebar.jsx
 import React, { useState } from "react";
 import {
   Building2,
@@ -28,7 +29,7 @@ const Sidebar = ({ selectedCompany, setSelectedCompany }) => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-white overflow-y-auto">
       <div className="p-5 border-b border-gray-200 bg-gray-50">
         <h2 className="text-xl font-semibold text-gray-800">POS System</h2>
       </div>
@@ -42,16 +43,15 @@ const Sidebar = ({ selectedCompany, setSelectedCompany }) => {
             className="w-full p-3 border-2 border-gray-200 rounded-lg bg-white cursor-pointer flex items-center justify-between hover:border-blue-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
-            <span className="flex items-center gap-3">
+            <span className="flex items-center gap-3 truncate">
               <span className="text-blue-600">
                 {React.createElement(
-                  companies.find((c) => c.name === selectedCompany)?.icon ||
-                    Building2,
+                  companies.find((c) => c.name === selectedCompany)?.icon || Building2,
                   { size: 20 }
                 )}
               </span>
-              <span className="font-medium text-gray-800">
-                {selectedCompany}
+              <span className="font-medium text-gray-800 truncate">
+                {selectedCompany || "Select Company"}
               </span>
             </span>
             <ChevronDown
@@ -68,16 +68,14 @@ const Sidebar = ({ selectedCompany, setSelectedCompany }) => {
                 <div
                   key={company.id}
                   className={`p-3 flex items-center gap-3 cursor-pointer transition-colors duration-200 hover:bg-gray-50 ${
-                    company.name === selectedCompany
-                      ? "bg-blue-50 text-blue-700"
-                      : ""
+                    company.name === selectedCompany ? "bg-blue-50 text-blue-700" : ""
                   }`}
                   onClick={() => handleCompanySelect(company)}
                 >
                   <span className="text-blue-600">
                     {React.createElement(company.icon, { size: 20 })}
                   </span>
-                  <span className="font-medium">{company.name}</span>
+                  <span className="font-medium truncate">{company.name}</span>
                 </div>
               ))}
             </div>
