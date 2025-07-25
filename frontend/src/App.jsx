@@ -12,6 +12,7 @@ import Accounts from "./pages/Accounts";
 import MoneyTransfer from "./pages/MoneyTransfer";
 import BalanceSheet from "./pages/BalanceSheet";
 import HomePage from "./pages/Homepage";
+import Sales from "./pages/Sales";
 
 const MainFunction = () => {
   return (
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
       { path: "/accounting/accounts", element: <Accounts /> },
       { path: "/accounting/money-transfer", element: <MoneyTransfer /> },
       { path: "/accounting/balance-sheet", element: <BalanceSheet /> },
+      { path: "/sales", element: <Sales /> },
     ],
   },
   { path: "/login", element: <Login /> },
