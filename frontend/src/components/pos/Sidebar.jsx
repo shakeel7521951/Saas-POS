@@ -320,7 +320,7 @@ const Sidebar = ({
                       </li>
                       <li>
                         <Link
-                          to="/reports/financial"
+                          to="/suppliers"
                           className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
                         >
                           <FaPeopleCarryBox  size={16} />

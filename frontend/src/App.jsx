@@ -15,6 +15,7 @@ import HomePage from "./pages/Homepage";
 import Sales from "./pages/Sales";
 import Users from "./pages/Users";
 import Customers from "./pages/Customers";
+import Suppliers from "./pages/Suppliers";
 
 const MainFunction = () => {
   return (
@@ -45,6 +46,7 @@ const router = createBrowserRouter([
       { path: "/sales", element: <Sales /> },
       { path: "/users", element: <Users /> },
       { path: "/customers", element: <Customers /> },
+      { path: "/suppliers", element: <Suppliers /> },
     ],
   },
   { path: "/login", element: <Login /> },
