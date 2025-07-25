@@ -311,7 +311,7 @@ const Sidebar = ({
                       </li>
                       <li>
                         <Link
-                          to="/reports/inventory"
+                          to="/customers"
                           className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
                         >
                           <RiCustomerService2Fill size={16} />
