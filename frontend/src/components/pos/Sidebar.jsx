@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { MdPeople } from "react-icons/md";
+import { TbUsersGroup } from "react-icons/tb";
+import { RiCustomerService2Fill } from "react-icons/ri";
+import { FaPeopleCarryBox } from "react-icons/fa6";
 import {
   Building2,
   Store,
@@ -229,7 +233,6 @@ const Sidebar = ({
                     Sales
                   </Link>
                 </li>
-
                 {/* Accounting Dropdown */}
                 <li>
                   <button
@@ -286,8 +289,8 @@ const Sidebar = ({
                     className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center justify-between"
                   >
                     <span className="flex items-center gap-3">
-                      <ClipboardList size={18} />
-                      Reports
+                      <MdPeople  size={18} />
+                      Peoples
                     </span>
                     {openDropdowns.reports ? (
                       <ChevronUp size={16} />
@@ -302,8 +305,8 @@ const Sidebar = ({
                           to="/reports/sales"
                           className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
                         >
-                          <BarChart2 size={16} />
-                          Sales Report
+                          <TbUsersGroup  size={16} />
+                          Users
                         </Link>
                       </li>
                       <li>
@@ -311,17 +314,17 @@ const Sidebar = ({
                           to="/reports/inventory"
                           className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
                         >
-                          <Package size={16} />
-                          Inventory Report
-                        </Link>
+                          <RiCustomerService2Fill size={16} />
+                          Customers
+                          </Link>
                       </li>
                       <li>
                         <Link
                           to="/reports/financial"
                           className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
                         >
-                          <Wallet size={16} />
-                          Financial Report
+                          <FaPeopleCarryBox  size={16} />
+                          Suppliers
                         </Link>
                       </li>
                     </ul>
