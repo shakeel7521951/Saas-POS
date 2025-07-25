@@ -302,7 +302,7 @@ const Sidebar = ({
                     <ul className="mt-1 ml-8 space-y-1">
                       <li>
                         <Link
-                          to="/reports/sales"
+                          to="/users"
                           className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
                         >
                           <TbUsersGroup  size={16} />
