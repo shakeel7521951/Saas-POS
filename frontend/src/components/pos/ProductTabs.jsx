@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Modal from "../../components/common/Modal";
 import AddProductForm from "../../components/common/AddProductForm";
+import EditProductForm from "../../components/common/EditProductForm";
+import { FaTimes } from "react-icons/fa";
 import {
   Search,
   Eye,
@@ -14,6 +16,8 @@ import {
 const ProductTabs = ({ selectedCompany }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editProduct, setEditProduct] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 10;
 
@@ -182,7 +186,15 @@ const ProductTabs = ({ selectedCompany }) => {
   };
 
   const handleEdit = (productId) => {
-    console.log(`Edit product ${productId}`);
+    const product = sampleProducts.find((p) => p.id === productId);
+    setEditProduct(product);
+    setShowEditModal(true);
+  };
+
+  const handleEditProductSubmit = (data) => {
+    console.log("Edited Product:", data);
+    setShowEditModal(false);
+    setEditProduct(null);
   };
 
   const handleDelete = (productId) => {
@@ -220,6 +232,30 @@ const ProductTabs = ({ selectedCompany }) => {
           categoryOptions={categories}
         />
       </Modal>
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 bg-white/30 backdrop-blur-sm flex items-center justify-center px-4">
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-xl p-6 relative border border-white/30 animate-fadeIn">
+            {/* Close Icon */}
+            <button
+              className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-xl"
+              onClick={() => setShowEditModal(false)}
+            >
+              <FaTimes />
+            </button>
+
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+              Edit Product
+            </h2>
+
+            <EditProductForm
+              onSubmit={handleEditProductSubmit}
+              onCancel={() => setShowEditModal(false)}
+              categoryOptions={categories}
+              initialData={editProduct}
+            />
+          </div>
+        </div>
+      )}
       {/* Header with company info */}
       <div className="mb-4 sm:mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">

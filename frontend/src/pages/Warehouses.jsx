@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Modal from "../components/common/Modal";
 import AddWarehouseForm from "../components/common/AddWarehouseForm";
+import EditWarehouseForm from "../components/common/EditWarehouseForm";
 
 const Warehouses = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -164,6 +165,8 @@ const Warehouses = () => {
   const totalPages = Math.ceil(filteredWarehouses.length / warehousesPerPage);
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editWarehouse, setEditWarehouse] = useState(null);
 
   const handleAddWarehouse = () => {
     setShowAddModal(true);
@@ -175,7 +178,15 @@ const Warehouses = () => {
   };
 
   const handleEdit = (warehouseId) => {
-    console.log(`Edit warehouse ${warehouseId}`);
+    const warehouse = sampleWarehouses.find((w) => w.id === warehouseId);
+    setEditWarehouse(warehouse);
+    setShowEditModal(true);
+  };
+
+  const handleEditWarehouseSubmit = (data) => {
+    console.log("Edited Warehouse:", data);
+    setShowEditModal(false);
+    setEditWarehouse(null);
   };
 
   const handleDelete = (warehouseId) => {
@@ -203,6 +214,17 @@ const Warehouses = () => {
         <AddWarehouseForm
           onSubmit={handleAddWarehouseSubmit}
           onCancel={() => setShowAddModal(false)}
+        />
+      </Modal>
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Edit Warehouse"
+      >
+        <EditWarehouseForm
+          onSubmit={handleEditWarehouseSubmit}
+          onCancel={() => setShowEditModal(false)}
+          initialData={editWarehouse}
         />
       </Modal>
       {/* Header */}

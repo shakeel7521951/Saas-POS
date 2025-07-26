@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Modal from "../components/common/Modal";
 import AddCategoryForm from "../components/common/AddCategoryForm";
+import EditCategoryForm from "../components/common/EditCategoryForm";
 import {
   Search,
   Plus,
@@ -142,6 +143,8 @@ const Category = () => {
   const totalPages = Math.ceil(filteredCategories.length / categoriesPerPage);
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editCategory, setEditCategory] = useState(null);
 
   const handleAddCategory = () => {
     setShowAddModal(true);
@@ -153,7 +156,15 @@ const Category = () => {
   };
 
   const handleEdit = (categoryId) => {
-    console.log(`Edit category ${categoryId}`);
+    const category = sampleCategories.find((c) => c.id === categoryId);
+    setEditCategory(category);
+    setShowEditModal(true);
+  };
+
+  const handleEditCategorySubmit = (data) => {
+    console.log("Edited Category:", data);
+    setShowEditModal(false);
+    setEditCategory(null);
   };
 
   const handleDelete = (categoryId) => {
@@ -178,6 +189,17 @@ const Category = () => {
           onSubmit={handleAddCategorySubmit}
           onCancel={() => setShowAddModal(false)}
           parentOptions={parentCategories}
+        />
+      </Modal>
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Edit Category"
+      >
+        <EditCategoryForm
+          onSubmit={handleEditCategorySubmit}
+          onCancel={() => setShowEditModal(false)}
+          initialData={editCategory}
         />
       </Modal>
       {/* Header */}

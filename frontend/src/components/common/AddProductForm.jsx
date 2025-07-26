@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 
-const AddProductFormModal = ({ onSubmit, onCancel, categoryOptions = [] }) => {
+const AddProductFormModal = ({
+  onSubmit,
+  onCancel,
+  categoryOptions = [],
+  initialData,
+}) => {
   const [form, setForm] = useState({
     name: "",
     price: "",

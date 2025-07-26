@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Modal from "../components/common/Modal";
 import AddBrandForm from "../components/common/AddBrandForm";
+import EditBrandForm from "../components/common/EditBrandForm";
 
 const Brands = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -155,6 +156,8 @@ const Brands = () => {
   const totalPages = Math.ceil(filteredBrands.length / brandsPerPage);
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editBrand, setEditBrand] = useState(null);
 
   const handleAddBrand = () => {
     setShowAddModal(true);
@@ -166,7 +169,15 @@ const Brands = () => {
   };
 
   const handleEdit = (brandId) => {
-    console.log(`Edit brand ${brandId}`);
+    const brand = sampleBrands.find((b) => b.id === brandId);
+    setEditBrand(brand);
+    setShowEditModal(true);
+  };
+
+  const handleEditBrandSubmit = (data) => {
+    console.log("Edited Brand:", data);
+    setShowEditModal(false);
+    setEditBrand(null);
   };
 
   const handleDelete = (brandId) => {
@@ -194,6 +205,17 @@ const Brands = () => {
         <AddBrandForm
           onSubmit={handleAddBrandSubmit}
           onCancel={() => setShowAddModal(false)}
+        />
+      </Modal>
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Edit Brand"
+      >
+        <EditBrandForm
+          onSubmit={handleEditBrandSubmit}
+          onCancel={() => setShowEditModal(false)}
+          initialData={editBrand}
         />
       </Modal>
       {/* Header */}
