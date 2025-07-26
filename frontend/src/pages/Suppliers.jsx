@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
-import { Search, Plus, ChevronLeft, ChevronRight, Eye, Edit2, Trash2, MoreVertical } from 'lucide-react';
+import { Search, Plus, ChevronLeft, ChevronRight, Eye, Edit2, Trash2 } from 'lucide-react';
 
 const Suppliers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const suppliersPerPage = 10;
+
+  // Status filter options
+  const statusOptions = [
+    { value: 'All', label: 'All Suppliers' },
+    { value: 'Active', label: 'Active' },
+    { value: 'Preferred', label: 'Preferred' },
+    { value: 'Pending', label: 'Pending' },
+    { value: 'Inactive', label: 'Inactive' },
+    { value: 'New', label: 'New' }
+  ];
 
   // Sample data
   const sampleSuppliers = [
@@ -131,20 +141,9 @@ const Suppliers = () => {
     }
   ];
 
-  // Status filter options
-  const statusOptions = [
-    { value: 'All', label: 'All Suppliers' },
-    { value: 'Active', label: 'Active' },
-    { value: 'Preferred', label: 'Preferred' },
-    { value: 'Pending', label: 'Pending' },
-    { value: 'Inactive', label: 'Inactive' },
-    { value: 'New', label: 'New' }
-  ];
-
   const filterSuppliers = () => {
     let filtered = sampleSuppliers;
     
-    // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter(supplier =>
         supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -153,7 +152,6 @@ const Suppliers = () => {
         supplier.email.toLowerCase().includes(searchTerm.toLowerCase()));
     }
     
-    // Apply status filter
     if (statusFilter !== 'All') {
       filtered = filtered.filter(supplier => supplier.status === statusFilter);
     }
@@ -161,7 +159,6 @@ const Suppliers = () => {
     return filtered;
   };
 
-  // Get current suppliers
   const filteredSuppliers = filterSuppliers();
   const indexOfLastSupplier = currentPage * suppliersPerPage;
   const indexOfFirstSupplier = indexOfLastSupplier - suppliersPerPage;
@@ -191,17 +188,20 @@ const Suppliers = () => {
   };
 
   return (
-    <div className="flex flex-col p-4 bg-gray-50">
+    <div className="flex flex-col p-6 min-h-screen">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Supplier Management</h1>
-        <p className="text-gray-600">Manage your suppliers and vendor relationships</p>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-blue-900">Supplier Management</h1>
+        <p className="text-blue-700 mt-2">Manage your suppliers and vendor relationships</p>
       </div>
 
       {/* Filters and Actions */}
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Search */}
         <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-blue-400" />
+          </div>
           <input
             type="text"
             placeholder="Search suppliers..."
@@ -210,11 +210,8 @@ const Suppliers = () => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 pl-10 pr-4 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
           />
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-gray-400" />
-          </div>
         </div>
         
         {/* Status Filter */}
@@ -224,7 +221,7 @@ const Suppliers = () => {
             setStatusFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="px-4 py-3 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm bg-white text-blue-900"
         >
           {statusOptions.map(option => (
             <option key={option.value} value={option.value}>{option.label}</option>
@@ -234,97 +231,94 @@ const Suppliers = () => {
         {/* Add Supplier Button */}
         <button
           onClick={handleAddSupplier}
-          className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-lg transition-all shadow-md hover:shadow-lg"
         >
-          <Plus className="h-4 w-4" />
-          <span>Add Supplier</span>
+          <Plus className="h-5 w-5" />
+          <span className="font-medium">Add Supplier</span>
         </button>
       </div>
 
       {/* Suppliers Table */}
-      <div className="flex-1 overflow-hidden min-h-0 flex flex-col bg-white rounded-lg shadow">
+      <div className="flex-1 overflow-hidden min-h-0 flex flex-col bg-white rounded-xl shadow-lg border border-blue-100">
         <div className="flex-1 overflow-y-auto">
-          <table className="w-full min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50 sticky top-0 z-10">
+          <table className="w-full min-w-full divide-y divide-blue-200">
+            <thead className="bg-blue-50 sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SL</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Since</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider">SL</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider">Supplier</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider">Contact</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider">Phone</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider">Products</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider">Since</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider">Action</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-blue-100">
               {currentSuppliers.length > 0 ? (
                 currentSuppliers.map((supplier, index) => (
-                  <tr key={supplier.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <tr key={supplier.id} className="hover:bg-blue-50 transition-colors duration-150">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm font-medium text-blue-900">
                       {indexOfFirstSupplier + index + 1}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-600 text-sm font-medium">
+                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center shadow-inner">
+                          <span className="text-blue-800 text-sm font-medium">
                             {supplier.name.split(' ').map(n => n[0]).join('')}
                           </span>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{supplier.name}</div>
-                          <div className="text-sm text-gray-500">{supplier.email}</div>
+                          <div className="text-sm font-semibold text-blue-900">{supplier.name}</div>
+                          <div className="text-sm text-blue-700">{supplier.email}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-blue-900">
                       {supplier.contact}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-blue-900">
                       {supplier.phone}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-blue-900 font-medium">
                       {supplier.products}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {supplier.since}
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-blue-900">
+                      {new Date(supplier.since).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        supplier.status === 'Preferred' ? 'bg-purple-100 text-purple-800' :
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        supplier.status === 'Preferred' ? 'bg-blue-100 text-blue-800' :
                         supplier.status === 'Active' ? 'bg-green-100 text-green-800' :
                         supplier.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                        supplier.status === 'New' ? 'bg-blue-100 text-blue-800' :
+                        supplier.status === 'New' ? 'bg-blue-200 text-blue-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
                         {supplier.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-2">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center space-x-3">
                         <button
                           onClick={() => handleView(supplier.id)}
-                          className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+                          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors"
                           title="View"
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => handleEdit(supplier.id)}
-                          className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-colors"
+                          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors"
                           title="Edit"
                         >
-                          <Edit2 className="h-4 w-4" />
+                          <Edit2 className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => handleDelete(supplier.id)}
-                          className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
                           title="Delete"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                        <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-                          <MoreVertical className="h-4 w-4" />
+                          <Trash2 className="h-5 w-5" />
                         </button>
                       </div>
                     </td>
@@ -332,19 +326,22 @@ const Suppliers = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="8" className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center justify-center">
-                      <Search className="h-8 w-8 text-gray-400 mb-2" />
-                      <p className="text-sm">No suppliers match your search criteria</p>
+                      <div className="bg-blue-100 p-4 rounded-full mb-4">
+                        <Search className="h-8 w-8 text-blue-500" />
+                      </div>
+                      <h3 className="text-lg font-medium text-blue-900 mb-1">No suppliers found</h3>
+                      <p className="text-blue-700 mb-4">Try adjusting your search or filter criteria</p>
                       <button 
                         onClick={() => {
                           setSearchTerm('');
                           setStatusFilter('All');
                           setCurrentPage(1);
                         }}
-                        className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                       >
-                        Clear filters
+                        Reset filters
                       </button>
                     </div>
                   </td>
@@ -356,23 +353,23 @@ const Suppliers = () => {
 
         {/* Pagination */}
         {filteredSuppliers.length > suppliersPerPage && (
-          <div className="border-t border-gray-200 px-4 py-3 flex items-center justify-between sm:px-6">
+          <div className="border-t border-blue-200 px-6 py-4 flex items-center justify-between bg-blue-50 rounded-b-xl">
             <div className="flex-1 flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-blue-800">
                   Showing <span className="font-medium">{indexOfFirstSupplier + 1}</span> to{' '}
                   <span className="font-medium">
                     {Math.min(indexOfLastSupplier, filteredSuppliers.length)}
                   </span>{' '}
-                  of <span className="font-medium">{filteredSuppliers.length}</span> results
+                  of <span className="font-medium">{filteredSuppliers.length}</span> suppliers
                 </p>
               </div>
               <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
                 <button
                   onClick={() => paginate(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
-                    currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
+                  className={`relative inline-flex items-center px-3 py-2 rounded-l-lg border border-blue-300 bg-white text-sm font-medium ${
+                    currentPage === 1 ? 'text-blue-300 cursor-not-allowed' : 'text-blue-700 hover:bg-blue-50'
                   }`}
                 >
                   <span className="sr-only">Previous</span>
@@ -398,8 +395,8 @@ const Suppliers = () => {
                       onClick={() => paginate(pageNumber)}
                       className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                         currentPage === pageNumber
-                          ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                          ? 'z-10 bg-blue-100 border-blue-500 text-blue-700'
+                          : 'bg-white border-blue-300 text-blue-700 hover:bg-blue-50'
                       }`}
                     >
                       {pageNumber}
@@ -408,7 +405,7 @@ const Suppliers = () => {
                 })}
                 
                 {totalPages > 5 && currentPage < totalPages - 2 && (
-                  <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                  <span className="relative inline-flex items-center px-4 py-2 border border-blue-300 bg-white text-sm font-medium text-blue-700">
                     ...
                   </span>
                 )}
@@ -416,8 +413,8 @@ const Suppliers = () => {
                 <button
                   onClick={() => paginate(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
-                    currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
+                  className={`relative inline-flex items-center px-3 py-2 rounded-r-lg border border-blue-300 bg-white text-sm font-medium ${
+                    currentPage === totalPages ? 'text-blue-300 cursor-not-allowed' : 'text-blue-700 hover:bg-blue-50'
                   }`}
                 >
                   <span className="sr-only">Next</span>

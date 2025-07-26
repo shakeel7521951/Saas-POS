@@ -189,17 +189,20 @@ const Customers = () => {
   };
 
   return (
-    <div className="flex flex-col p-4 bg-gray-50">
+    <div className="flex flex-col p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Customer Management</h1>
-        <p className="text-gray-600">Manage your customer records and interactions</p>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Customer Management</h1>
+        <p className="text-gray-600 mt-2">Manage your customer records and interactions</p>
       </div>
 
       {/* Filters and Actions */}
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Search */}
         <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
           <input
             type="text"
             placeholder="Search customers..."
@@ -208,11 +211,8 @@ const Customers = () => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 pl-10 pr-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm"
           />
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-gray-400" />
-          </div>
         </div>
         
         {/* Status Filter */}
@@ -222,7 +222,7 @@ const Customers = () => {
             setStatusFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm bg-white"
         >
           {statusOptions.map(option => (
             <option key={option.value} value={option.value}>{option.label}</option>
@@ -232,63 +232,63 @@ const Customers = () => {
         {/* Add Customer Button */}
         <button
           onClick={handleAddCustomer}
-          className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-lg transition-all shadow-md hover:shadow-lg"
         >
-          <Plus className="h-4 w-4" />
-          <span>Add Customer</span>
+          <Plus className="h-5 w-5" />
+          <span className="font-medium">Add Customer</span>
         </button>
       </div>
 
       {/* Customers Table */}
-      <div className="flex-1 overflow-hidden min-h-0 flex flex-col bg-white rounded-lg shadow">
+      <div className="flex-1 overflow-hidden min-h-0 flex flex-col bg-white rounded-xl shadow-lg">
         <div className="flex-1 overflow-y-auto">
           <table className="w-full min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SL</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone Number</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orders</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created On</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">SL</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Customer</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Phone Number</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Orders</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Total Spent</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Created On</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Action</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {currentCustomers.length > 0 ? (
                 currentCustomers.map((customer, index) => (
-                  <tr key={customer.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <tr key={customer.id} className="hover:bg-gray-50 transition-colors duration-150">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm font-medium text-gray-900">
                       {indexOfFirstCustomer + index + 1}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-600 text-sm font-medium">
+                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center shadow-inner">
+                          <span className="text-indigo-800 text-sm font-medium">
                             {customer.name.split(' ').map(n => n[0]).join('')}
                           </span>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{customer.name}</div>
+                          <div className="text-sm font-semibold text-gray-900">{customer.name}</div>
                           <div className="text-sm text-gray-500">{customer.email}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-700">
                       {customer.phone}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-700 font-medium">
                       {customer.orders}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      ${customer.totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-700 font-medium">
+                      <span className="text-green-600">${customer.totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {customer.createdOn}
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-700">
+                      {new Date(customer.createdOn).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         customer.status === 'VIP' ? 'bg-purple-100 text-purple-800' :
                         customer.status === 'Active' ? 'bg-green-100 text-green-800' :
                         customer.status === 'New' ? 'bg-blue-100 text-blue-800' :
@@ -297,31 +297,28 @@ const Customers = () => {
                         {customer.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-2">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center space-x-3">
                         <button
                           onClick={() => handleView(customer.id)}
-                          className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+                          className="p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded-lg transition-colors"
                           title="View"
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => handleEdit(customer.id)}
-                          className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-colors"
+                          className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors"
                           title="Edit"
                         >
-                          <Edit2 className="h-4 w-4" />
+                          <Edit2 className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => handleDelete(customer.id)}
-                          className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                          className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors"
                           title="Delete"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                        <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-                          <MoreVertical className="h-4 w-4" />
+                          <Trash2 className="h-5 w-5" />
                         </button>
                       </div>
                     </td>
@@ -329,19 +326,22 @@ const Customers = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="8" className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center justify-center">
-                      <Search className="h-8 w-8 text-gray-400 mb-2" />
-                      <p className="text-sm">No customers match your search criteria</p>
+                      <div className="bg-gray-100 p-4 rounded-full mb-4">
+                        <Search className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-1">No customers found</h3>
+                      <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
                       <button 
                         onClick={() => {
                           setSearchTerm('');
                           setStatusFilter('All');
                           setCurrentPage(1);
                         }}
-                        className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                       >
-                        Clear filters
+                        Reset filters
                       </button>
                     </div>
                   </td>
@@ -353,7 +353,7 @@ const Customers = () => {
 
         {/* Pagination */}
         {filteredCustomers.length > customersPerPage && (
-          <div className="border-t border-gray-200 px-4 py-3 flex items-center justify-between sm:px-6">
+          <div className="border-t border-gray-200 px-6 py-4 flex items-center justify-between bg-gray-50 rounded-b-xl">
             <div className="flex-1 flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-700">
@@ -361,15 +361,15 @@ const Customers = () => {
                   <span className="font-medium">
                     {Math.min(indexOfLastCustomer, filteredCustomers.length)}
                   </span>{' '}
-                  of <span className="font-medium">{filteredCustomers.length}</span> results
+                  of <span className="font-medium">{filteredCustomers.length}</span> customers
                 </p>
               </div>
               <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
                 <button
                   onClick={() => paginate(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
-                    currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
+                  className={`relative inline-flex items-center px-3 py-2 rounded-l-lg border border-gray-300 bg-white text-sm font-medium ${
+                    currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   <span className="sr-only">Previous</span>
@@ -395,8 +395,8 @@ const Customers = () => {
                       onClick={() => paginate(pageNumber)}
                       className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                         currentPage === pageNumber
-                          ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                          ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       {pageNumber}
@@ -413,8 +413,8 @@ const Customers = () => {
                 <button
                   onClick={() => paginate(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
-                    currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
+                  className={`relative inline-flex items-center px-3 py-2 rounded-r-lg border border-gray-300 bg-white text-sm font-medium ${
+                    currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   <span className="sr-only">Next</span>
