@@ -1,4 +1,7 @@
 import { useState } from "react";
+import Modal from "../components/common/Modal";
+import AddCategoryForm from "../components/common/AddCategoryForm";
+import EditCategoryForm from "../components/common/EditCategoryForm";
 import {
   Search,
   Plus,
@@ -177,12 +180,29 @@ const Category = () => {
   );
   const totalPages = Math.ceil(filteredCategories.length / categoriesPerPage);
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editCategory, setEditCategory] = useState(null);
+
   const handleAddCategory = () => {
-    console.log("Add new category");
+    setShowAddModal(true);
+  };
+
+  const handleAddCategorySubmit = (data) => {
+    console.log("New Category:", data);
+    setShowAddModal(false);
   };
 
   const handleEdit = (categoryId) => {
-    console.log(`Edit category ${categoryId}`);
+    const category = sampleCategories.find((c) => c.id === categoryId);
+    setEditCategory(category);
+    setShowEditModal(true);
+  };
+
+  const handleEditCategorySubmit = (data) => {
+    console.log("Edited Category:", data);
+    setShowEditModal(false);
+    setEditCategory(null);
   };
 
   const handleDelete = (categoryId) => {
@@ -200,7 +220,30 @@ const Category = () => {
   };
 
   return (
-    <div className="flex flex-col p-6 bg-gray-50 min-h-screen">
+    <div className=" flex flex-col p-4 bg-gray-50">
+      {/* Add Category Modal */}
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Add Category"
+      >
+        <AddCategoryForm
+          onSubmit={handleAddCategorySubmit}
+          onCancel={() => setShowAddModal(false)}
+          parentOptions={parentCategories}
+        />
+      </Modal>
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Edit Category"
+      >
+        <EditCategoryForm
+          onSubmit={handleEditCategorySubmit}
+          onCancel={() => setShowEditModal(false)}
+          initialData={editCategory}
+        />
+      </Modal>
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>

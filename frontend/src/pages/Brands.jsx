@@ -1,10 +1,21 @@
-import React, { useState } from 'react';
-import { Search, Plus, ChevronLeft, ChevronRight, Edit2, Trash2, MoreVertical, Eye, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Search,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Edit2,
+  Trash2,
+  MoreVertical,
+  Eye,
+} from "lucide-react";
+import Modal from "../components/common/Modal";
+import AddBrandForm from "../components/common/AddBrandForm";
+import EditBrandForm from "../components/common/EditBrandForm";
 
 const Brands = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [productCountFilter, setProductCountFilter] = useState('All');
-  const [statusFilter, setStatusFilter] = useState('All');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [productCountFilter, setProductCountFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
   const [showFilters, setShowFilters] = useState(false);
@@ -12,77 +23,127 @@ const Brands = () => {
 
   // Sample data with status and featured properties
   const sampleBrands = [
-    { id: 1, name: 'Nike', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 125, status: 'active', featured: true },
-    { id: 2, name: 'Adidas', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 98, status: 'active', featured: true },
-    { id: 3, name: 'Apple', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 75, status: 'active', featured: false },
-    { id: 4, name: 'Samsung', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 112, status: 'active', featured: true },
-    { id: 5, name: 'Sony', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 64, status: 'active', featured: false },
-    { id: 6, name: 'Dell', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 53, status: 'active', featured: false },
-    { id: 7, name: 'HP', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 87, status: 'active', featured: false },
-    { id: 8, name: 'Lenovo', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 42, status: 'inactive', featured: false },
-    { id: 9, name: 'Microsoft', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 68, status: 'active', featured: false },
-    { id: 10, name: 'Canon', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 39, status: 'active', featured: false },
-    { id: 11, name: 'Nikon', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 31, status: 'inactive', featured: false },
-    { id: 12, name: 'LG', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 58, status: 'active', featured: false },
-    { id: 13, name: 'Panasonic', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 47, status: 'active', featured: false },
-    { id: 14, name: 'Philips', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 36, status: 'active', featured: false },
-    { id: 15, name: 'Bose', image: 'https://i.imgur.com/4ZQZQ9u.png', productCount: 29, status: 'active', featured: false }
+    {
+      id: 1,
+      name: "Nike",
+      image: "https://via.placeholder.com/40",
+      productCount: 125,
+    },
+    {
+      id: 2,
+      name: "Adidas",
+      image: "https://via.placeholder.com/40",
+      productCount: 98,
+    },
+    {
+      id: 3,
+      name: "Apple",
+      image: "https://via.placeholder.com/40",
+      productCount: 75,
+    },
+    {
+      id: 4,
+      name: "Samsung",
+      image: "https://via.placeholder.com/40",
+      productCount: 112,
+    },
+    {
+      id: 5,
+      name: "Sony",
+      image: "https://via.placeholder.com/40",
+      productCount: 64,
+    },
+    {
+      id: 6,
+      name: "Dell",
+      image: "https://via.placeholder.com/40",
+      productCount: 53,
+    },
+    {
+      id: 7,
+      name: "HP",
+      image: "https://via.placeholder.com/40",
+      productCount: 87,
+    },
+    {
+      id: 8,
+      name: "Lenovo",
+      image: "https://via.placeholder.com/40",
+      productCount: 42,
+    },
+    {
+      id: 9,
+      name: "Microsoft",
+      image: "https://via.placeholder.com/40",
+      productCount: 68,
+    },
+    {
+      id: 10,
+      name: "Canon",
+      image: "https://via.placeholder.com/40",
+      productCount: 39,
+    },
+    {
+      id: 11,
+      name: "Nikon",
+      image: "https://via.placeholder.com/40",
+      productCount: 31,
+    },
+    {
+      id: 12,
+      name: "LG",
+      image: "https://via.placeholder.com/40",
+      productCount: 58,
+    },
+    {
+      id: 13,
+      name: "Panasonic",
+      image: "https://via.placeholder.com/40",
+      productCount: 47,
+    },
+    {
+      id: 14,
+      name: "Philips",
+      image: "https://via.placeholder.com/40",
+      productCount: 36,
+    },
+    {
+      id: 15,
+      name: "Bose",
+      image: "https://via.placeholder.com/40",
+      productCount: 29,
+    },
   ];
 
   // Filter options
   const productCountOptions = [
-    { value: 'All', label: 'All Products' },
-    { value: '0-50', label: '0-50 Products' },
-    { value: '51-100', label: '51-100 Products' },
-    { value: '100+', label: '100+ Products' }
+    { value: "All", label: "All Products" },
+    { value: "0-50", label: "0-50 Products" },
+    { value: "51-100", label: "51-100 Products" },
+    { value: "100+", label: "100+ Products" },
   ];
-
-  const statusOptions = [
-    { value: 'All', label: 'All Statuses' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' }
-  ];
-
-  const requestSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const sortedBrands = [...sampleBrands].sort((a, b) => {
-    if (a[sortConfig.key] < b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
-    }
-    if (a[sortConfig.key] > b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
-    }
-    return 0;
-  });
 
   const filterBrands = () => {
-    let filtered = sortedBrands;
-    
+    let filtered = sampleBrands;
+
     // Apply search filter
     if (searchTerm) {
-      filtered = filtered.filter(brand =>
-        brand.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      filtered = filtered.filter((brand) =>
+        brand.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
-    
+
     // Apply product count filter
-    if (productCountFilter !== 'All') {
-      const [min, max] = productCountFilter === '100+' ? [100, Infinity] : 
-                         productCountFilter.split('-').map(Number);
-      filtered = filtered.filter(brand => 
-        brand.productCount >= min && brand.productCount <= max);
+    if (productCountFilter !== "All") {
+      const [min, max] =
+        productCountFilter === "100+"
+          ? [100, Infinity]
+          : productCountFilter.split("-").map(Number);
+      filtered = filtered.filter(
+        (brand) => brand.productCount >= min && brand.productCount <= max
+      );
     }
-    
-    // Apply status filter
-    if (statusFilter !== 'All') {
-      filtered = filtered.filter(brand => brand.status === statusFilter);
-    }
-    
+
     return filtered;
   };
 
@@ -90,15 +151,35 @@ const Brands = () => {
   const filteredBrands = filterBrands();
   const indexOfLastBrand = currentPage * brandsPerPage;
   const indexOfFirstBrand = indexOfLastBrand - brandsPerPage;
-  const currentBrands = filteredBrands.slice(indexOfFirstBrand, indexOfLastBrand);
+  const currentBrands = filteredBrands.slice(
+    indexOfFirstBrand,
+    indexOfLastBrand
+  );
   const totalPages = Math.ceil(filteredBrands.length / brandsPerPage);
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editBrand, setEditBrand] = useState(null);
+
   const handleAddBrand = () => {
-    console.log('Add new brand');
+    setShowAddModal(true);
+  };
+
+  const handleAddBrandSubmit = (data) => {
+    console.log("New Brand:", data);
+    setShowAddModal(false);
   };
 
   const handleEdit = (brandId) => {
-    console.log(`Edit brand ${brandId}`);
+    const brand = sampleBrands.find((b) => b.id === brandId);
+    setEditBrand(brand);
+    setShowEditModal(true);
+  };
+
+  const handleEditBrandSubmit = (data) => {
+    console.log("Edited Brand:", data);
+    setShowEditModal(false);
+    setEditBrand(null);
   };
 
   const handleDelete = (brandId) => {
@@ -126,7 +207,29 @@ const Brands = () => {
   };
 
   return (
-    <div className="flex flex-col p-6 bg-gray-50 min-h-screen">
+    <div className="flex flex-col p-4 bg-gray-50">
+      {/* Add Brand Modal */}
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Add Brand"
+      >
+        <AddBrandForm
+          onSubmit={handleAddBrandSubmit}
+          onCancel={() => setShowAddModal(false)}
+        />
+      </Modal>
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Edit Brand"
+      >
+        <EditBrandForm
+          onSubmit={handleEditBrandSubmit}
+          onCancel={() => setShowEditModal(false)}
+          initialData={editBrand}
+        />
+      </Modal>
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -162,72 +265,32 @@ const Brands = () => {
             <Search className="h-4 w-4 text-gray-400" />
           </div>
         </div>
-        
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm"
-          >
-            <Filter className="h-4 w-4" />
-            <span>Filters</span>
-            {showFilters ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </button>
-        </div>
-      </div>
 
-      {/* Expanded Filters */}
-      {showFilters && (
-        <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200 shadow-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Products Range</label>
-              <select
-                value={productCountFilter}
-                onChange={(e) => {
-                  setProductCountFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
-              >
-                {productCountOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
-              >
-                {statusOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Featured</label>
-              <select
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
-              >
-                <option>All Brands</option>
-                <option>Featured Only</option>
-                <option>Non-Featured</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
+        {/* Product Count Filter */}
+        <select
+          value={productCountFilter}
+          onChange={(e) => {
+            setProductCountFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          {productCountOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Add Brand Button */}
+        <button
+          onClick={handleAddBrand}
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+          <span>Add Brand</span>
+        </button>
+      </div>
 
       {/* Brands Table */}
       <div className="flex-1 overflow-hidden min-h-0 flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -235,45 +298,20 @@ const Brands = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  #
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  SL
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Logo
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Image
                 </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => requestSort("name")}
-                >
-                  <div className="flex items-center">
-                    Brand Name
-                    {sortConfig.key === "name" && (
-                      <span className="ml-1">
-                        {sortConfig.direction === "asc" ? "↑" : "↓"}
-                      </span>
-                    )}
-                  </div>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Brand
                 </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => requestSort("productCount")}
-                >
-                  <div className="flex items-center">
-                    Products
-                    {sortConfig.key === "productCount" && (
-                      <span className="ml-1">
-                        {sortConfig.direction === "asc" ? "↑" : "↓"}
-                      </span>
-                    )}
-                  </div>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Products
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
                 </th>
               </tr>
             </thead>
@@ -285,46 +323,30 @@ const Brands = () => {
                       {indexOfFirstBrand + index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-200">
-                        <img 
-                          src={brand.image} 
-                          alt={brand.name} 
-                          className="h-full w-full object-contain p-1"
+                      <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                        <img
+                          src={brand.image}
+                          alt={brand.name}
+                          className="h-full w-full object-cover"
                         />
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="ml-2">
-                          <div className="text-sm font-medium text-gray-900">
-                            {brand.name}
-                          </div>
-                          {brand.featured && (
-                            <span className="text-xs text-yellow-600 bg-yellow-50 px-1.5 py-0.5 rounded">
-                              Featured
-                            </span>
-                          )}
-                        </div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {brand.name}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-20 mr-2">
-                          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full ${getProductCountColor(brand.productCount).replace('text', 'bg').split(' ')[0]}`} 
-                              style={{ width: `${Math.min(100, (brand.productCount / 125) * 100)}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getProductCountColor(brand.productCount)}`}>
-                          {brand.productCount}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(brand.status)}`}>
-                        {brand.status === 'active' ? 'Active' : 'Inactive'}
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          brand.productCount > 100
+                            ? "bg-purple-100 text-purple-800"
+                            : brand.productCount > 50
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {brand.productCount} products
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -362,13 +384,25 @@ const Brands = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center">
+                  <td
+                    colSpan="5"
+                    className="px-6 py-8 text-center text-gray-500"
+                  >
                     <div className="flex flex-col items-center justify-center">
                       <Search className="h-8 w-8 text-gray-400 mb-2" />
-                      <h3 className="text-sm font-medium text-gray-900">No brands found</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Try adjusting your search or filter to find what you're looking for.
+                      <p className="text-sm">
+                        No brands match your search criteria
                       </p>
+                      <button
+                        onClick={() => {
+                          setSearchTerm("");
+                          setProductCountFilter("All");
+                          setCurrentPage(1);
+                        }}
+                        className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                      >
+                        Clear filters
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -403,52 +437,78 @@ const Brands = () => {
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm text-gray-700">
-                  Showing <span className="font-medium">{indexOfFirstBrand + 1}</span> to{' '}
+                  Showing{" "}
+                  <span className="font-medium">{indexOfFirstBrand + 1}</span>{" "}
+                  to{" "}
                   <span className="font-medium">
                     {Math.min(indexOfLastBrand, filteredBrands.length)}
-                  </span>{' '}
-                  of <span className="font-medium">{filteredBrands.length}</span> results
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-medium">{filteredBrands.length}</span>{" "}
+                  results
                 </p>
               </div>
-              <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                  <button
-                    onClick={() => paginate(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
-                      currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
-                    }`}
-                  >
-                    <span className="sr-only">Previous</span>
-                    <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-                  </button>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                <button
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                    currentPage === 1
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-500 hover:bg-gray-50"
+                  }`}
+                >
+                  <span className="sr-only">Previous</span>
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+
+                {/* Page numbers */}
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNumber;
+                  if (totalPages <= 5) {
+                    pageNumber = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNumber = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNumber = totalPages - 4 + i;
+                  } else {
+                    pageNumber = currentPage - 2 + i;
+                  }
+
+                  return (
                     <button
-                      key={number}
-                      onClick={() => paginate(number)}
-                      className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${
-                        currentPage === number
-                          ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                          : 'bg-white text-gray-500 hover:bg-gray-50'
+                      key={pageNumber}
+                      onClick={() => paginate(pageNumber)}
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                        currentPage === pageNumber
+                          ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                          : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
                       }`}
                     >
                       {number}
                     </button>
-                  ))}
-                  
-                  <button
-                    onClick={() => paginate(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
-                      currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
-                    }`}
-                  >
-                    <span className="sr-only">Next</span>
-                    <ChevronRight className="h-5 w-5" aria-hidden="true" />
-                  </button>
-                </nav>
-              </div>
+                  );
+                })}
+
+                {totalPages > 5 && currentPage < totalPages - 2 && (
+                  <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                    ...
+                  </span>
+                )}
+
+                <button
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                    currentPage === totalPages
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-500 hover:bg-gray-50"
+                  }`}
+                >
+                  <span className="sr-only">Next</span>
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </nav>
             </div>
           </div>
         )}
