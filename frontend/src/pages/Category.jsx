@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Modal from "../components/common/Modal";
+import AddCategoryForm from "../components/common/AddCategoryForm";
 import {
   Search,
   Plus,
@@ -139,8 +141,15 @@ const Category = () => {
   );
   const totalPages = Math.ceil(filteredCategories.length / categoriesPerPage);
 
+  const [showAddModal, setShowAddModal] = useState(false);
+
   const handleAddCategory = () => {
-    console.log("Add new category");
+    setShowAddModal(true);
+  };
+
+  const handleAddCategorySubmit = (data) => {
+    console.log("New Category:", data);
+    setShowAddModal(false);
   };
 
   const handleEdit = (categoryId) => {
@@ -159,6 +168,18 @@ const Category = () => {
 
   return (
     <div className=" flex flex-col p-4 bg-gray-50">
+      {/* Add Category Modal */}
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Add Category"
+      >
+        <AddCategoryForm
+          onSubmit={handleAddCategorySubmit}
+          onCancel={() => setShowAddModal(false)}
+          parentOptions={parentCategories}
+        />
+      </Modal>
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
