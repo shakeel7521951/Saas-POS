@@ -9,7 +9,7 @@ const MoneyTransfer = () => {
   const transfersPerPage = 10;
 
   // Sample data
-  const sampleTransfers = [
+  const sampleTransfers = [ 
     {
       id: 1,
       date: '2023-05-15',

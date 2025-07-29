@@ -17,7 +17,10 @@ const Warehouses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [productCountFilter, setProductCountFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState({
+    key: "name",
+    direction: "asc",
+  });
   const [showFilters, setShowFilters] = useState(false);
   const warehousesPerPage = 10;
 
@@ -206,17 +209,21 @@ const Warehouses = () => {
   };
 
   const getProductCountColor = (count) => {
-    if (count > 1000) return 'bg-purple-100 text-purple-800';
-    if (count > 500) return 'bg-blue-100 text-blue-800';
-    return 'bg-green-100 text-green-800';
+    if (count > 1000) return "bg-purple-100 text-purple-800";
+    if (count > 500) return "bg-blue-100 text-blue-800";
+    return "bg-green-100 text-green-800";
   };
 
   const getStatusColor = (status) => {
-    switch(status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'maintenance': return 'bg-yellow-100 text-yellow-800';
-      case 'inactive': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+    switch (status) {
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "maintenance":
+        return "bg-yellow-100 text-yellow-800";
+      case "inactive":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -225,8 +232,8 @@ const Warehouses = () => {
   };
 
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   return (
@@ -339,7 +346,10 @@ const Warehouses = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {currentWarehouses.length > 0 ? (
                 currentWarehouses.map((warehouse, index) => (
-                  <tr key={warehouse.id} className="hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={warehouse.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {indexOfFirstWarehouse + index + 1}
                     </td>
@@ -368,20 +378,36 @@ const Warehouses = () => {
                       <div className="flex items-center">
                         <div className="w-24 mr-2">
                           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
+                            <div
                               className={`h-full ${
-                                getCapacityPercentage(warehouse.productCount, warehouse.capacity) > 75 
-                                  ? 'bg-red-500' 
-                                  : getCapacityPercentage(warehouse.productCount, warehouse.capacity) > 50 
-                                  ? 'bg-yellow-500' 
-                                  : 'bg-green-500'
+                                getCapacityPercentage(
+                                  warehouse.productCount,
+                                  warehouse.capacity
+                                ) > 75
+                                  ? "bg-red-500"
+                                  : getCapacityPercentage(
+                                      warehouse.productCount,
+                                      warehouse.capacity
+                                    ) > 50
+                                  ? "bg-yellow-500"
+                                  : "bg-green-500"
                               }`}
-                              style={{ width: `${getCapacityPercentage(warehouse.productCount, warehouse.capacity)}%` }}
+                              style={{
+                                width: `${getCapacityPercentage(
+                                  warehouse.productCount,
+                                  warehouse.capacity
+                                )}%`,
+                              }}
                             ></div>
                           </div>
                         </div>
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getProductCountColor(warehouse.productCount)}`}>
-                          {warehouse.productCount.toLocaleString()}/{warehouse.capacity.toLocaleString()}
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full ${getProductCountColor(
+                            warehouse.productCount
+                          )}`}
+                        >
+                          {(warehouse?.productCount ?? 0).toLocaleString()}/
+                          {(warehouse?.capacity ?? 0).toLocaleString()}
                         </span>
                       </div>
                     </td>
@@ -468,7 +494,9 @@ const Warehouses = () => {
                 onClick={() => paginate(currentPage - 1)}
                 disabled={currentPage === 1}
                 className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
-                  currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
+                  currentPage === 1
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 Previous
@@ -477,7 +505,9 @@ const Warehouses = () => {
                 onClick={() => paginate(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
-                  currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
+                  currentPage === totalPages
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 Next
@@ -538,7 +568,7 @@ const Warehouses = () => {
                           : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
                       }`}
                     >
-                      {number}
+                      {pageNumber}
                     </button>
                   );
                 })}

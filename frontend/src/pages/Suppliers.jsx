@@ -154,14 +154,14 @@ const Suppliers = () => {
   ];
 
   // Status filter options
-  const statusOptions = [
-    { value: "All", label: "All Suppliers" },
-    { value: "Active", label: "Active" },
-    { value: "Preferred", label: "Preferred" },
-    { value: "Pending", label: "Pending" },
-    { value: "Inactive", label: "Inactive" },
-    { value: "New", label: "New" },
-  ];
+  // const statusOptions = [
+  //   { value: "All", label: "All Suppliers" },
+  //   { value: "Active", label: "Active" },
+  //   { value: "Preferred", label: "Preferred" },
+  //   { value: "Pending", label: "Pending" },
+  //   { value: "Inactive", label: "Inactive" },
+  //   { value: "New", label: "New" },
+  // ];
 
   const filterSuppliers = () => {
     let filtered = sampleSuppliers;
