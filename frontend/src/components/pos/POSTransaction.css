@@ -1,0 +1,59 @@
+/* POS Transaction Styles */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
+
+.pos-transaction {
+  font-family: 'Lato', sans-serif;
+}
+
+/* Custom button styles */
+.btn-primary-green {
+  background-color: #2a843f;
+  color: #ffffff;
+  transition: background-color 0.3s;
+}
+
+.btn-primary-green:hover {
+  background-color: #1f6830;
+}
+
+.btn-primary-blue {
+  background-color: #004089;
+  color: #ffffff;
+  transition: background-color 0.3s;
+}
+
+.btn-primary-blue:hover {
+  background-color: #003070;
+}
+
+/* Custom focus styles for inputs */
+.pos-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(42, 132, 63, 0.3);
+  border-color: #2a843f;
+}
+
+/* Table hover effects */
+.pos-table-row:hover {
+  background-color: rgba(235, 237, 239, 0.2);
+}
+
+/* Custom scrollbar */
+.pos-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.pos-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.pos-scrollbar::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 4px;
+}
+
+.pos-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}

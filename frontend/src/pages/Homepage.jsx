@@ -16,7 +16,8 @@ import {
   MoreHorizontal,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
+  ShoppingCart
 } from "lucide-react";
 import { Bar, Pie, Line } from 'react-chartjs-2';
 import {
@@ -31,6 +32,7 @@ import {
   PointElement,
   LineElement
 } from 'chart.js';
+import { useNavigate } from "react-router-dom";
 
 // Register ChartJS components
 ChartJS.register(
@@ -46,6 +48,8 @@ ChartJS.register(
 );
 
 const HomePage = () => {
+  const navigate = useNavigate();
+
   // Sample data
   const analyticsData = {
     sales: {
@@ -195,6 +199,13 @@ const HomePage = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate("/pos-transaction")}
+            className="flex items-center gap-2 bg-[#2a843f] hover:bg-[#1f6830] text-white px-4 py-2 rounded-lg shadow-sm transition-colors"
+          >
+            <ShoppingCart className="h-5 w-5" />
+            <span className="font-medium">POS Transaction</span>
+          </button>
           <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
             <Calendar className="h-5 w-5 text-gray-500" />
             <span className="text-sm font-medium text-gray-700">June 15, 2023</span>
@@ -778,3 +789,4 @@ const HomePage = () => {
 };
 
 export default HomePage;
+

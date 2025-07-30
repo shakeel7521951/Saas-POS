@@ -16,6 +16,7 @@ import Sales from "./pages/Sales";
 import Users from "./pages/Users";
 import Customers from "./pages/Customers";
 import Suppliers from "./pages/Suppliers";
+import POSTransaction from "./pages/POSTransaction";
 
 const MainFunction = () => {
   return (
@@ -47,6 +48,7 @@ const router = createBrowserRouter([
       { path: "/users", element: <Users /> },
       { path: "/customers", element: <Customers /> },
       { path: "/suppliers", element: <Suppliers /> },
+      { path: "/pos-transaction", element: <POSTransaction /> },
     ],
   },
   { path: "/login", element: <Login /> },
