@@ -1,0 +1,77 @@
+/* Enhanced POS Handsontable Styling */
+.pos-handsontable .handsontable {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.pos-handsontable .handsontable td {
+  border: 1px solid #e5e7eb !important;
+  background-color: white;
+  vertical-align: middle;
+}
+
+.pos-handsontable .handsontable td:hover {
+  background-color: #f8fafc !important;
+}
+
+.pos-handsontable .handsontable th {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  border: 1px solid #d1d5db !important;
+  text-align: center !important;
+}
+
+.pos-handsontable .handsontable .htAutocompleteArrow {
+  color: #6b7280 !important;
+}
+
+.pos-handsontable .handsontable .htDropdownMenu {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.pos-handsontable .handsontable .current,
+.pos-handsontable .handsontable .current.area {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+  border: 2px solid #3b82f6 !important;
+}
+
+.pos-handsontable .handsontable .area {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+.pos-handsontable .handsontable input {
+  border: none !important;
+  background: transparent !important;
+  padding: 8px !important;
+  font-size: 14px !important;
+}
+
+.pos-handsontable .handsontable input:focus {
+  outline: none !important;
+  background: rgba(59, 130, 246, 0.05) !important;
+}
+
+/* Row headers */
+.pos-handsontable .handsontable .ht_clone_left th {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%) !important;
+  color: #6b7280 !important;
+  font-weight: 500 !important;
+}
+
+/* Context menu styling */
+.pos-handsontable .htContextMenu {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.pos-handsontable .htContextMenu .ht_clone_top {
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.pos-handsontable .htContextMenu .ht_clone_bottom {
+  border-radius: 0 0 8px 8px !important;
+}

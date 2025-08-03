@@ -28,7 +28,7 @@ import {
   Home,
   Menu,
   X,
-  Tags
+  Tags,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -42,7 +42,7 @@ const Sidebar = ({
     company: false,
     product: false,
     accounting: false,
-    reports: false
+    reports: false,
   });
 
   const companies = [
@@ -53,15 +53,15 @@ const Sidebar = ({
   ];
 
   const toggleDropdown = (dropdown) => {
-    setOpenDropdowns(prev => ({
+    setOpenDropdowns((prev) => ({
       ...prev,
-      [dropdown]: !prev[dropdown]
+      [dropdown]: !prev[dropdown],
     }));
   };
 
   const handleCompanySelect = (company) => {
     setSelectedCompany(company.name);
-    toggleDropdown('company');
+    toggleDropdown("company");
   };
 
   // Mobile responsive toggle button for sidebar
@@ -77,7 +77,7 @@ const Sidebar = ({
   return (
     <>
       <MobileToggleButton />
-      
+
       <div
         className={`fixed md:static top-0 left-0 h-screen w-64 bg-white shadow-md z-30 transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
@@ -89,7 +89,9 @@ const Sidebar = ({
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="text-blue-600" size={20} />
-                <h2 className="text-xl font-semibold text-gray-800">POS System</h2>
+                <h2 className="text-xl font-semibold text-gray-800">
+                  POS System
+                </h2>
               </div>
             </div>
           </div>
@@ -102,7 +104,7 @@ const Sidebar = ({
             <div className="relative">
               <button
                 className="w-full p-3 border-2 border-gray-200 rounded-lg bg-white cursor-pointer flex items-center justify-between hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                onClick={() => toggleDropdown('company')}
+                onClick={() => toggleDropdown("company")}
               >
                 <span className="flex items-center gap-3 truncate">
                   <span className="text-blue-600">
@@ -138,7 +140,9 @@ const Sidebar = ({
                       <span className="text-blue-600">
                         {React.createElement(company.icon, { size: 20 })}
                       </span>
-                      <span className="font-medium truncate">{company.name}</span>
+                      <span className="font-medium truncate">
+                        {company.name}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -168,7 +172,7 @@ const Sidebar = ({
                 {/* Product Dropdown */}
                 <li>
                   <button
-                    onClick={() => toggleDropdown('product')}
+                    onClick={() => toggleDropdown("product")}
                     className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center justify-between"
                   >
                     <span className="flex items-center gap-3">
@@ -202,8 +206,8 @@ const Sidebar = ({
                         </Link>
                       </li>
                       <li>
-                        <Link 
-                          to="/brands" 
+                        <Link
+                          to="/brands"
                           className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
                         >
                           <Tags size={16} />
@@ -211,8 +215,8 @@ const Sidebar = ({
                         </Link>
                       </li>
                       <li>
-                        <Link 
-                          to="/warehouses" 
+                        <Link
+                          to="/warehouses"
                           className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
                         >
                           <Warehouse size={16} />
@@ -236,7 +240,7 @@ const Sidebar = ({
                 {/* Accounting Dropdown */}
                 <li>
                   <button
-                    onClick={() => toggleDropdown('accounting')}
+                    onClick={() => toggleDropdown("accounting")}
                     className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center justify-between"
                   >
                     <span className="flex items-center gap-3">
@@ -285,11 +289,11 @@ const Sidebar = ({
                 {/* Reports Dropdown */}
                 <li>
                   <button
-                    onClick={() => toggleDropdown('reports')}
+                    onClick={() => toggleDropdown("reports")}
                     className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center justify-between"
                   >
                     <span className="flex items-center gap-3">
-                      <MdPeople  size={18} />
+                      <MdPeople size={18} />
                       Peoples
                     </span>
                     {openDropdowns.reports ? (
@@ -300,7 +304,7 @@ const Sidebar = ({
                   </button>
                   {openDropdowns.reports && (
                     <ul className="mt-1 ml-8 space-y-1">
-                      <li>
+                      {/* <li>
                         <Link
                           to="/users"
                           className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
@@ -308,7 +312,7 @@ const Sidebar = ({
                           <TbUsersGroup  size={16} />
                           Users
                         </Link>
-                      </li>
+                      </li> */}
                       <li>
                         <Link
                           to="/customers"
@@ -316,14 +320,14 @@ const Sidebar = ({
                         >
                           <RiCustomerService2Fill size={16} />
                           Customers
-                          </Link>
+                        </Link>
                       </li>
                       <li>
                         <Link
                           to="/suppliers"
                           className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
                         >
-                          <FaPeopleCarryBox  size={16} />
+                          <FaPeopleCarryBox size={16} />
                           Suppliers
                         </Link>
                       </li>
@@ -332,7 +336,7 @@ const Sidebar = ({
                 </li>
 
                 {/* Customers */}
-                <li>
+                {/* <li>
                   <Link
                     to="/customers"
                     className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center gap-3"
@@ -340,7 +344,7 @@ const Sidebar = ({
                     <Users size={18} />
                     Customers
                   </Link>
-                </li>
+                </li> */}
 
                 {/* Settings */}
                 <li>
@@ -363,7 +367,9 @@ const Sidebar = ({
                 <User size={20} />
               </div>
               <div>
-                <div className="font-semibold text-gray-800 text-sm">Shakeel</div>
+                <div className="font-semibold text-gray-800 text-sm">
+                  Shakeel
+                </div>
                 <div className="text-xs text-gray-500">Admin</div>
               </div>
             </div>

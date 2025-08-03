@@ -1,8 +1,8 @@
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import "./App.css";
+import "./hide-scrollbar.css"; // Global scrollbar hiding
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import POS from "./pages/POS";
 import Sidebar from "./components/pos/Sidebar";
 import ProductTabs from "./components/pos/ProductTabs";
 import Category from "./pages/Category";
@@ -51,6 +51,7 @@ const router = createBrowserRouter([
       { path: "/pos-transaction", element: <POSTransaction /> },
     ],
   },
+
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
 ]);

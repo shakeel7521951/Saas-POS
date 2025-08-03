@@ -1,0 +1,58 @@
+/* Universal Scrollbar Hide - Professional Look */
+/* This hides scrollbars globally while maintaining scroll functionality */
+
+/* Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* Chrome, Safari, Edge, Opera */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Internet Explorer and Edge Legacy */
+* {
+  -ms-overflow-style: none;
+}
+
+/* Ensure scrolling still works on all elements */
+html,
+body {
+  overflow: auto;
+}
+
+/* For specific containers that need scrolling */
+.scrollable {
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollable::-webkit-scrollbar {
+  display: none;
+}
+
+/* Make sure the POS application maintains scroll functionality */
+.pos-container {
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pos-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* For modal and overlay scrolling */
+.modal-scroll,
+.overlay-scroll {
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.modal-scroll::-webkit-scrollbar,
+.overlay-scroll::-webkit-scrollbar {
+  display: none;
+}
