@@ -82,7 +82,7 @@ const productList = [
 const transactionTypes = [
   { id: "quotation", name: "Quotation" },
   { id: "order", name: "Order" },
-  { id: "sales", name: "Sales/POS" },
+  { id: "sales", name: "Sales" },
   { id: "returns", name: "Returns" },
 ];
 
