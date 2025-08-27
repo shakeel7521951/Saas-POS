@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from "react";
-import { useTable, usePagination, useGlobalFilter } from "react-table";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { useNavigate } from "react-router-dom";
+import { FaShoppingCart } from "react-icons/fa";
 
 /**
  * Sage-Style Transactions Suite (Data Display Only)
@@ -74,25 +81,24 @@ const Button = ({ children, kind = "primary", className = "", ...rest }) => {
 
 // GENERIC, ELEGANT DATA TABLE
 function DataTable({ columns, data }) {
-  const table = useTable(
-    { columns, data, initialState: { pageIndex: 0, pageSize: 8 } },
-    useGlobalFilter,
-    usePagination
-  );
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    prepareRow,
-    page,
-    state,
-    setGlobalFilter,
-    canPreviousPage,
-    canNextPage,
-    nextPage,
-    previousPage,
-    pageOptions,
-  } = table;
+  const [globalFilter, setGlobalFilter] = useState('');
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      globalFilter,
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 8,
+      },
+    },
+  });
 
   return (
     <Card>
@@ -100,62 +106,63 @@ function DataTable({ columns, data }) {
         <input
           className="px-3 py-2 border border-gray-200 rounded-lg w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-emerald-200"
           placeholder="Search by customer, #, amount…"
-          value={state.globalFilter || ""}
+          value={globalFilter || ""}
           onChange={(e) => setGlobalFilter(e.target.value)}
         />
       </div>
       <div className="overflow-auto mt-3">
-        <table {...getTableProps()} className="w-full text-sm">
+        <table className="w-full text-sm">
           <thead className="sticky top-0 bg-gray-50/90 backdrop-blur border-b border-gray-200">
-            {headerGroups.map((hg) => (
-              <tr {...hg.getHeaderGroupProps()}>
-                {hg.headers.map((col) => (
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
                   <th
-                    {...col.getHeaderProps()}
+                    key={header.id}
                     className="text-left font-semibold text-gray-600 px-4 py-2 whitespace-nowrap"
                   >
-                    {col.render("Header")}
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
                   </th>
                 ))}
               </tr>
             ))}
           </thead>
-          <tbody {...getTableBodyProps()} className="divide-y divide-gray-100">
-            {page.map((row) => {
-              prepareRow(row);
-              return (
-                <tr {...row.getRowProps()} className="hover:bg-gray-50">
-                  {row.cells.map((cell) => (
-                    <td
-                      {...cell.getCellProps()}
-                      className="px-4 py-2 whitespace-nowrap"
-                    >
-                      {cell.render("Cell")}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
+          <tbody className="divide-y divide-gray-100">
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="hover:bg-gray-50">
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className="px-4 py-2 whitespace-nowrap"
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
       <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
         <div className="text-xs text-gray-500">
-          Page {state.pageIndex + 1} of {pageOptions.length || 1}
+          Page {table.getState().pagination.pageIndex + 1} of{" "}
+          {table.getPageCount() || 1}
         </div>
         <div className="flex gap-2">
           <Button
             kind="ghost"
-            onClick={previousPage}
-            disabled={!canPreviousPage}
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
             className="disabled:opacity-50"
           >
             Prev
           </Button>
           <Button
             kind="ghost"
-            onClick={nextPage}
-            disabled={!canNextPage}
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
             className="disabled:opacity-50"
           >
             Next
@@ -204,7 +211,9 @@ function TransactionPage({ title, columns, data, onNavigateToPOS }) {
               <option>Closed</option>
               <option>Cancelled</option>
             </select>
-            <Button onClick={onNavigateToPOS}>🛒 POS</Button>
+            <Button onClick={onNavigateToPOS}>
+              <FaShoppingCart className="inline mr-1" /> POS
+            </Button>
           </div>
         </div>
       </Card>
@@ -221,15 +230,17 @@ export function SalesInvoicesPage() {
 
   const columns = useMemo(
     () => [
-      { Header: "Invoice #", accessor: "id" },
-      { Header: "Customer", accessor: "customer" },
-      { Header: "Date", accessor: "date" },
-      { Header: "Amount", accessor: "amount" },
+      { header: "Invoice #", accessorKey: "id" },
+      { header: "Customer", accessorKey: "customer" },
+      { header: "Date", accessorKey: "date" },
+      { header: "Amount", accessorKey: "amount" },
       {
-        Header: "Status",
-        accessor: "status",
-        Cell: ({ value }) => (
-          <Badge tone={value === "Paid" ? "green" : "yellow"}>{value}</Badge>
+        header: "Status",
+        accessorKey: "status",
+        cell: ({ getValue }) => (
+          <Badge tone={getValue() === "Paid" ? "green" : "yellow"}>
+            {getValue()}
+          </Badge>
         ),
       },
     ],
@@ -271,16 +282,16 @@ export function QuotationsPage() {
 
   const columns = useMemo(
     () => [
-      { Header: "Quotation #", accessor: "id" },
-      { Header: "Customer", accessor: "customer" },
-      { Header: "Date", accessor: "date" },
-      { Header: "Amount", accessor: "amount" },
+      { header: "Quotation #", accessorKey: "id" },
+      { header: "Customer", accessorKey: "customer" },
+      { header: "Date", accessorKey: "date" },
+      { header: "Amount", accessorKey: "amount" },
       {
-        Header: "Status",
-        accessor: "status",
-        Cell: ({ value }) => (
-          <Badge tone={value === "Approved" ? "green" : "yellow"}>
-            {value}
+        header: "Status",
+        accessorKey: "status",
+        cell: ({ getValue }) => (
+          <Badge tone={getValue() === "Approved" ? "green" : "yellow"}>
+            {getValue()}
           </Badge>
         ),
       },
@@ -323,16 +334,18 @@ export function OrdersPage() {
 
   const columns = useMemo(
     () => [
-      { Header: "Order #", accessor: "id" },
-      { Header: "Customer", accessor: "customer" },
-      { Header: "Warehouse", accessor: "warehouse" },
-      { Header: "Date", accessor: "date" },
-      { Header: "Total", accessor: "total" },
+      { header: "Order #", accessorKey: "id" },
+      { header: "Customer", accessorKey: "customer" },
+      { header: "Warehouse", accessorKey: "warehouse" },
+      { header: "Date", accessorKey: "date" },
+      { header: "Total", accessorKey: "total" },
       {
-        Header: "Status",
-        accessor: "status",
-        Cell: ({ value }) => (
-          <Badge tone={value === "Closed" ? "green" : "blue"}>{value}</Badge>
+        header: "Status",
+        accessorKey: "status",
+        cell: ({ getValue }) => (
+          <Badge tone={getValue() === "Closed" ? "green" : "blue"}>
+            {getValue()}
+          </Badge>
         ),
       },
     ],
@@ -376,11 +389,11 @@ export function ReturnsPage() {
 
   const columns = useMemo(
     () => [
-      { Header: "Return #", accessor: "id" },
-      { Header: "Invoice/Order", accessor: "ref" },
-      { Header: "Customer", accessor: "customer" },
-      { Header: "Date", accessor: "date" },
-      { Header: "Amount", accessor: "amount" },
+      { header: "Return #", accessorKey: "id" },
+      { header: "Invoice/Order", accessorKey: "ref" },
+      { header: "Customer", accessorKey: "customer" },
+      { header: "Date", accessorKey: "date" },
+      { header: "Amount", accessorKey: "amount" },
     ],
     []
   );
