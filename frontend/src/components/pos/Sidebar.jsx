@@ -1,56 +1,30 @@
 import React, { useState } from "react";
-import { MdPeople } from "react-icons/md";
-import { TbUsersGroup } from "react-icons/tb";
-import { RiCustomerService2Fill } from "react-icons/ri";
-import { FaPeopleCarryBox } from "react-icons/fa6";
+import { motion, AnimatePresence } from "framer-motion";
 import {
+  Home,
+  FileText,
+  ClipboardList,
+  ShoppingCart,
+  RefreshCw,
   Building2,
-  Store,
-  ShoppingBag,
-  Factory,
+  Users,
+  Package,
+  Warehouse,
+  User,
+  CreditCard,
   ChevronDown,
   ChevronUp,
-  BarChart2,
-  Package,
-  Users,
-  Settings,
-  User,
-  LayoutGrid,
-  Tag,
-  Warehouse,
-  Landmark,
-  ArrowLeftRight,
-  FileText,
-  CreditCard,
-  ShoppingCart,
-  ClipboardList,
-  Wallet,
-  Home,
   Menu,
   X,
-  Tags,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const Sidebar = ({
-  selectedCompany,
-  setSelectedCompany,
-  isOpen,
-  toggleSidebar,
-}) => {
+const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [openDropdowns, setOpenDropdowns] = useState({
-    company: false,
-    product: false,
-    accounting: false,
-    reports: false,
+    transactions: false,
+    data: false,
+    billing: false,
   });
-
-  const companies = [
-    { id: 1, name: "Company A", icon: Building2 },
-    { id: 2, name: "Company B", icon: Store },
-    { id: 3, name: "Company C", icon: ShoppingBag },
-    { id: 4, name: "Company D", icon: Factory },
-  ];
 
   const toggleDropdown = (dropdown) => {
     setOpenDropdowns((prev) => ({
@@ -59,323 +33,211 @@ const Sidebar = ({
     }));
   };
 
-  const handleCompanySelect = (company) => {
-    setSelectedCompany(company.name);
-    toggleDropdown("company");
-  };
-
-  // Mobile responsive toggle button for sidebar
+  // Mobile toggle button
   const MobileToggleButton = () => (
     <button
       onClick={toggleSidebar}
-      className="md:hidden absolute -right-12 top-4 p-2 rounded-md bg-white shadow-md"
+      className="md:hidden absolute -right-12 top-4 p-2 rounded-md bg-green-600 text-white shadow-md"
     >
-      {isOpen ? <X size={24} /> : <Menu size={24} />}
+      {isOpen ? <X size={22} /> : <Menu size={22} />}
     </button>
   );
 
   return (
     <>
       <MobileToggleButton />
-
-      <div
-        className={`fixed md:static top-0 left-0 h-screen w-64 bg-white shadow-md z-30 transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
+      <motion.div
+        initial={{ x: -260 }}
+        animate={{ x: isOpen ? 0 : -260 }}
+        transition={{ type: "spring", stiffness: 80 }}
+        className="fixed md:static top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 z-30"
       >
         <div className="flex flex-col h-full">
-          {/* Top Section */}
-          <div className="p-5 border-b border-gray-200 bg-gray-50">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="text-blue-600" size={20} />
-                <h2 className="text-xl font-semibold text-gray-800">
-                  POS System
-                </h2>
-              </div>
-            </div>
+          {/* Brand */}
+          <div className="p-5 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
+            <ShoppingCart className="text-green-600" size={20} />
+            <h2 className="text-lg font-semibold text-gray-800">Sage POS</h2>
           </div>
 
-          {/* Company Dropdown */}
-          <div className="p-5 border-b border-gray-200">
-            <label className="block text-sm font-medium text-gray-600 mb-2">
-              Select Company
-            </label>
-            <div className="relative">
-              <button
-                className="w-full p-3 border-2 border-gray-200 rounded-lg bg-white cursor-pointer flex items-center justify-between hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                onClick={() => toggleDropdown("company")}
-              >
-                <span className="flex items-center gap-3 truncate">
-                  <span className="text-blue-600">
-                    {React.createElement(
-                      companies.find((c) => c.name === selectedCompany)?.icon ||
-                        Building2,
-                      { size: 20 }
-                    )}
-                  </span>
-                  <span className="font-medium text-gray-800 truncate">
-                    {selectedCompany || "Select Company"}
-                  </span>
-                </span>
-                {openDropdowns.company ? (
-                  <ChevronUp className="text-gray-500" size={16} />
-                ) : (
-                  <ChevronDown className="text-gray-500" size={16} />
-                )}
-              </button>
+          {/* Navigation */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <ul className="space-y-2 text-sm">
+              {/* Dashboard */}
+              <li>
+                <Link
+                  to="/"
+                  className="flex items-center gap-3 p-3 rounded-md text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
+                >
+                  <Home size={18} />
+                  Dashboard
+                </Link>
+              </li>
 
-              {openDropdowns.company && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 mt-1 overflow-hidden max-h-60 overflow-y-auto">
-                  {companies.map((company) => (
-                    <div
-                      key={company.id}
-                      className={`p-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 ${
-                        company.name === selectedCompany
-                          ? "bg-blue-50 text-blue-700"
-                          : ""
-                      }`}
-                      onClick={() => handleCompanySelect(company)}
+              {/* Transactions Dropdown */}
+              <li>
+                <button
+                  onClick={() => toggleDropdown("transactions")}
+                  className="flex items-center justify-between w-full p-3 rounded-md text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
+                >
+                  <span className="flex items-center gap-3">
+                    <FileText size={18} />
+                    Transactions
+                  </span>
+                  {openDropdowns.transactions ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
+                </button>
+                <AnimatePresence>
+                  {openDropdowns.transactions && (
+                    <motion.ul
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="ml-8 mt-1 space-y-1"
                     >
-                      <span className="text-blue-600">
-                        {React.createElement(company.icon, { size: 20 })}
-                      </span>
-                      <span className="font-medium truncate">
-                        {company.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Menu Items with Scroll */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-5">
-              <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Home size={18} />
-                Quick Actions
-              </h3>
-              <ul className="space-y-2">
-                {/* Dashboard */}
-                <li>
-                  <Link
-                    to="/dashboard"
-                    className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center gap-3"
-                  >
-                    <BarChart2 size={18} />
-                    Dashboard
-                  </Link>
-                </li>
-
-                {/* Product Dropdown */}
-                <li>
-                  <button
-                    onClick={() => toggleDropdown("product")}
-                    className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center justify-between"
-                  >
-                    <span className="flex items-center gap-3">
-                      <Package size={18} />
-                      Products
-                    </span>
-                    {openDropdowns.product ? (
-                      <ChevronUp size={16} />
-                    ) : (
-                      <ChevronDown size={16} />
-                    )}
-                  </button>
-                  {openDropdowns.product && (
-                    <ul className="mt-1 ml-8 space-y-1">
                       <li>
                         <Link
-                          to="/categories"
-                          className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
+                          to="/transactions/sales-invoices"
+                          className="flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-green-50 hover:text-green-700"
                         >
-                          <LayoutGrid size={16} />
-                          Categories
+                          <ClipboardList size={16} /> Sales Invoices
                         </Link>
                       </li>
                       <li>
                         <Link
-                          to="/products"
-                          className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
+                          to="/transactions/quotations"
+                          className="flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-green-50 hover:text-green-700"
                         >
-                          <Tag size={16} />
-                          Products
+                          <FileText size={16} /> Quotations
                         </Link>
                       </li>
                       <li>
                         <Link
-                          to="/brands"
-                          className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
+                          to="/transactions/orders"
+                          className="flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-green-50 hover:text-green-700"
                         >
-                          <Tags size={16} />
-                          Brands
+                          <ShoppingCart size={16} /> Orders
                         </Link>
                       </li>
                       <li>
                         <Link
-                          to="/warehouses"
-                          className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
+                          to="/transactions/returns"
+                          className="flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-green-50 hover:text-green-700"
                         >
-                          <Warehouse size={16} />
-                          Warehouses
+                          <RefreshCw size={16} /> Returns
                         </Link>
                       </li>
-                    </ul>
+                    </motion.ul>
                   )}
-                </li>
+                </AnimatePresence>
+              </li>
 
-                {/* Sales */}
-                <li>
-                  <Link
-                    to="/sales"
-                    className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center gap-3"
-                  >
-                    <ShoppingCart size={18} />
-                    Sales
-                  </Link>
-                </li>
-                {/* Accounting Dropdown */}
-                <li>
-                  <button
-                    onClick={() => toggleDropdown("accounting")}
-                    className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center justify-between"
-                  >
-                    <span className="flex items-center gap-3">
-                      <Landmark size={18} />
-                      Accounting
-                    </span>
-                    {openDropdowns.accounting ? (
-                      <ChevronUp size={16} />
-                    ) : (
-                      <ChevronDown size={16} />
-                    )}
-                  </button>
-                  {openDropdowns.accounting && (
-                    <ul className="mt-1 ml-8 space-y-1">
-                      <li>
-                        <Link
-                          to="/accounting/accounts"
-                          className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
-                        >
-                          <CreditCard size={16} />
-                          Accounts
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/accounting/money-transfer"
-                          className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
-                        >
-                          <ArrowLeftRight size={16} />
-                          Money Transfer
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/accounting/balance-sheet"
-                          className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
-                        >
-                          <FileText size={16} />
-                          Balance Sheet
-                        </Link>
-                      </li>
-                    </ul>
+              {/* Data Dropdown */}
+              <li>
+                <button
+                  onClick={() => toggleDropdown("data")}
+                  className="flex items-center justify-between w-full p-3 rounded-md text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
+                >
+                  <span className="flex items-center gap-3">
+                    <Package size={18} />
+                    Data
+                  </span>
+                  {openDropdowns.data ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
                   )}
-                </li>
-
-                {/* Reports Dropdown */}
-                <li>
-                  <button
-                    onClick={() => toggleDropdown("reports")}
-                    className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center justify-between"
-                  >
-                    <span className="flex items-center gap-3">
-                      <MdPeople size={18} />
-                      Peoples
-                    </span>
-                    {openDropdowns.reports ? (
-                      <ChevronUp size={16} />
-                    ) : (
-                      <ChevronDown size={16} />
-                    )}
-                  </button>
-                  {openDropdowns.reports && (
-                    <ul className="mt-1 ml-8 space-y-1">
-                      {/* <li>
-                        <Link
-                          to="/users"
-                          className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
-                        >
-                          <TbUsersGroup  size={16} />
-                          Users
-                        </Link>
-                      </li> */}
+                </button>
+                <AnimatePresence>
+                  {openDropdowns.data && (
+                    <motion.ul
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="ml-8 mt-1 space-y-1"
+                    >
                       <li>
                         <Link
-                          to="/customers"
-                          className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
+                          to="/data/customers"
+                          className="flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-green-50 hover:text-green-700"
                         >
-                          <RiCustomerService2Fill size={16} />
-                          Customers
+                          <Users size={16} /> Customers
                         </Link>
                       </li>
                       <li>
                         <Link
-                          to="/suppliers"
-                          className="w-full p-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100 flex items-center gap-2"
+                          to="/data/items"
+                          className="flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-green-50 hover:text-green-700"
                         >
-                          <FaPeopleCarryBox size={16} />
-                          Suppliers
+                          <Package size={16} /> Items
                         </Link>
                       </li>
-                    </ul>
+                      <li>
+                        <Link
+                          to="/data/warehouses"
+                          className="flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-green-50 hover:text-green-700"
+                        >
+                          <Warehouse size={16} /> Warehouses
+                        </Link>
+                      </li>
+                    </motion.ul>
                   )}
-                </li>
+                </AnimatePresence>
+              </li>
 
-                {/* Customers */}
-                {/* <li>
-                  <Link
-                    to="/customers"
-                    className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center gap-3"
-                  >
-                    <Users size={18} />
-                    Customers
-                  </Link>
-                </li> */}
-
-                {/* Settings */}
-                <li>
-                  <Link
-                    to="/settings"
-                    className="w-full p-3 text-left rounded-lg cursor-pointer text-gray-600 transition hover:bg-gray-50 hover:text-blue-600 flex items-center gap-3"
-                  >
-                    <Settings size={18} />
-                    Settings
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="p-5 border-t border-gray-200 bg-gray-50">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
-                <User size={20} />
-              </div>
-              <div>
-                <div className="font-semibold text-gray-800 text-sm">
-                  Shakeel
-                </div>
-                <div className="text-xs text-gray-500">Admin</div>
-              </div>
-            </div>
+              {/* Billing & Account Dropdown */}
+              <li>
+                <button
+                  onClick={() => toggleDropdown("billing")}
+                  className="flex items-center justify-between w-full p-3 rounded-md text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
+                >
+                  <span className="flex items-center gap-3">
+                    <CreditCard size={18} />
+                    Billing & Account
+                  </span>
+                  {openDropdowns.billing ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
+                </button>
+                <AnimatePresence>
+                  {openDropdowns.billing && (
+                    <motion.ul
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="ml-8 mt-1 space-y-1"
+                    >
+                      <li>
+                        <Link
+                          to="/account/my-account"
+                          className="flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-green-50 hover:text-green-700"
+                        >
+                          <User size={16} /> My Account
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/account/billing-subscription"
+                          className="flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-green-50 hover:text-green-700"
+                        >
+                          <CreditCard size={16} /> Billing & Subscription
+                        </Link>
+                      </li>
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              </li>
+            </ul>
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 };
