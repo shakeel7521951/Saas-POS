@@ -15,7 +15,18 @@ import {
   Settings,
   Activity,
   LogOut,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
+import {
+  useGetMeDetailedQuery,
+  useGetAccountActivityQuery,
+  useUpdateProfileMutation,
+  useUpdatePasswordMutation,
+  useLogoutMutation,
+} from "../../../store/api/authApi";
+import { useGetSageStatusQuery } from "../../../store/api/sageApi";
+import { toast } from "react-hot-toast";
 
 // SAGE THEME (matching other pages)
 const THEME = {
@@ -79,40 +90,138 @@ const Button = ({ children, kind = "primary", className = "", ...rest }) => {
 
 export default function MyAccountPage() {
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
+  });
 
-  const accountData = {
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+1 (555) 123-4567",
-    role: "Administrator",
-    company: "Sage Co. Ltd",
-    location: "New York, USA",
-    joinDate: "March 2024",
-    lastLogin: "Today at 2:30 PM",
-    avatar: null,
+  // API Hooks
+  const {
+    data: userDetails,
+    isLoading: userLoading,
+    error: userError,
+  } = useGetMeDetailedQuery();
+  const { data: activityData, isLoading: activityLoading } =
+    useGetAccountActivityQuery();
+  const { data: sageStatus } = useGetSageStatusQuery();
+  const [updateProfile, { isLoading: updateLoading }] =
+    useUpdateProfileMutation();
+  const [updatePassword] = useUpdatePasswordMutation();
+  const [logout] = useLogoutMutation();
+
+  // Initialize form data when user data loads
+  React.useEffect(() => {
+    if (userDetails) {
+      setFormData({
+        firstName: userDetails.firstName || "",
+        lastName: userDetails.lastName || "",
+        email: userDetails.email || "",
+        phone: userDetails.phone || "",
+      });
+    }
+  }, [userDetails]);
+
+  const handleSave = async () => {
+    try {
+      await updateProfile(formData).unwrap();
+      setIsEditing(false);
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      toast.error(error.message || "Failed to update profile");
+    }
   };
 
+  const handlePasswordUpdate = async () => {
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    try {
+      await updatePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+        confirmNewPassword: passwordData.confirmNewPassword,
+      }).unwrap();
+      setShowPasswordModal(false);
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+      toast.success("Password updated successfully!");
+    } catch (error) {
+      toast.error(error.message || "Failed to update password");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      toast.success("Logged out successfully");
+    } catch {
+      toast.error("Logout failed");
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  if (userLoading) {
+    return (
+      <div className="max-w-7xl mx-auto p-6 flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading account details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (userError) {
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <Card className="p-6 text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Error Loading Account
+          </h2>
+          <p className="text-gray-600">
+            Failed to load account details. Please try again.
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
+  const accountData = userDetails || {};
+  const activeCompany = accountData.activeCompany;
+
   const securitySettings = [
-    {
-      name: "Two-Factor Authentication",
-      enabled: true,
-      description: "Add extra security to your account",
-    },
-    {
-      name: "Email Notifications",
-      enabled: true,
-      description: "Get notified about account activity",
-    },
-    {
-      name: "Login Alerts",
-      enabled: false,
-      description: "Get alerts for new device logins",
-    },
-    {
-      name: "Session Management",
-      enabled: true,
-      description: "Automatically log out inactive sessions",
-    },
+    // {
+    //   name: "Two-Factor Authentication",
+    //   enabled: true,
+    //   description: "Add extra security to your account",
+    // },
+    // {
+    //   name: "Email Notifications",
+    //   enabled: true,
+    //   description: "Get notified about account activity",
+    // },
+    // {
+    //   name: "Login Alerts",
+    //   enabled: false,
+    //   description: "Get alerts for new device logins",
+    // },
+    // {
+    //   name: "Session Management",
+    //   enabled: true,
+    //   description: "Automatically log out inactive sessions",
+    // },
   ];
 
   return (
@@ -127,11 +236,11 @@ export default function MyAccountPage() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button kind="ghost">
+            {/* <Button kind="ghost">
               <Activity className="w-4 h-4" />
               Activity Log
-            </Button>
-            <Button kind="danger">
+            </Button> */}
+            <Button kind="danger" onClick={handleLogout}>
               <LogOut className="w-4 h-4" />
               Sign Out
             </Button>
@@ -152,13 +261,14 @@ export default function MyAccountPage() {
               </p>
             </div>
             <Button
-              kind={isEditing ? "ghost" : "primary"}
-              onClick={() => setIsEditing(!isEditing)}
+              kind={isEditing ? "primary" : "ghost"}
+              onClick={isEditing ? handleSave : () => setIsEditing(!isEditing)}
+              disabled={updateLoading}
             >
               {isEditing ? (
                 <>
                   <Save className="w-4 h-4" />
-                  Save Changes
+                  {updateLoading ? "Saving..." : "Save Changes"}
                 </>
               ) : (
                 <>
@@ -181,18 +291,27 @@ export default function MyAccountPage() {
             </div>
             <div>
               <h3 className="text-xl font-semibold text-gray-800">
-                {accountData.name}
+                {accountData.fullName ||
+                  `${accountData.firstName} ${accountData.lastName}`}
               </h3>
               <p className="text-gray-600">{accountData.email}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Badge tone="emerald">
                   <Shield className="w-3 h-3 mr-1" />
-                  {accountData.role}
+                  {accountData.role || "User"}
                 </Badge>
-                <Badge tone="blue">
-                  <Building2 className="w-3 h-3 mr-1" />
-                  {accountData.company}
-                </Badge>
+                {activeCompany && (
+                  <Badge tone="blue">
+                    <Building2 className="w-3 h-3 mr-1" />
+                    {activeCompany.companyName}
+                  </Badge>
+                )}
+                {!activeCompany && accountData.sageConnected === false && (
+                  <Badge tone="yellow">
+                    <AlertCircle className="w-3 h-3 mr-1" />
+                    No Company Connected
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -201,27 +320,31 @@ export default function MyAccountPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               {
-                label: "Full Name",
-                value: accountData.name,
+                label: "First Name",
+                value: accountData.firstName,
+                field: "firstName",
+                icon: User,
+                editable: true,
+              },
+              {
+                label: "Last Name",
+                value: accountData.lastName,
+                field: "lastName",
                 icon: User,
                 editable: true,
               },
               {
                 label: "Email Address",
                 value: accountData.email,
+                field: "email",
                 icon: Mail,
                 editable: true,
               },
               {
                 label: "Phone Number",
                 value: accountData.phone,
+                field: "phone",
                 icon: Phone,
-                editable: true,
-              },
-              {
-                label: "Location",
-                value: accountData.location,
-                icon: MapPin,
                 editable: true,
               },
               {
@@ -231,8 +354,8 @@ export default function MyAccountPage() {
                 editable: false,
               },
               {
-                label: "Company",
-                value: accountData.company,
+                label: "Active Company",
+                value: activeCompany?.companyName || "No company connected",
                 icon: Building2,
                 editable: false,
               },
@@ -252,11 +375,16 @@ export default function MyAccountPage() {
                   {isEditing && field.editable ? (
                     <input
                       type="text"
-                      defaultValue={field.value}
+                      value={formData[field.field] || ""}
+                      onChange={(e) =>
+                        handleInputChange(field.field, e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-200"
                     />
                   ) : (
-                    <p className="text-gray-800 font-medium">{field.value}</p>
+                    <p className="text-gray-800 font-medium">
+                      {field.value || "Not set"}
+                    </p>
                   )}
                 </div>
               );
@@ -271,17 +399,49 @@ export default function MyAccountPage() {
           </h2>
 
           <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+            <div
+              className={`p-4 rounded-lg border ${
+                accountData.isEmailVerified
+                  ? "bg-green-50 border-green-200"
+                  : "bg-yellow-50 border-yellow-200"
+              }`}
+            >
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-white" />
+                <div
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    accountData.isEmailVerified
+                      ? "bg-green-600"
+                      : "bg-yellow-600"
+                  }`}
+                >
+                  {accountData.isEmailVerified ? (
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-white" />
+                  )}
                 </div>
-                <span className="text-sm font-medium text-green-800">
-                  Account Verified
+                <span
+                  className={`text-sm font-medium ${
+                    accountData.isEmailVerified
+                      ? "text-green-800"
+                      : "text-yellow-800"
+                  }`}
+                >
+                  {accountData.isEmailVerified
+                    ? "Account Verified"
+                    : "Email Not Verified"}
                 </span>
               </div>
-              <p className="text-xs text-green-700">
-                Your account is fully verified and active
+              <p
+                className={`text-xs ${
+                  accountData.isEmailVerified
+                    ? "text-green-700"
+                    : "text-yellow-700"
+                }`}
+              >
+                {accountData.isEmailVerified
+                  ? "Your account is fully verified and active"
+                  : "Please verify your email address"}
               </p>
             </div>
 
@@ -292,7 +452,18 @@ export default function MyAccountPage() {
                   Member Since
                 </span>
               </div>
-              <p className="text-xs text-gray-600">{accountData.joinDate}</p>
+              <p className="text-xs text-gray-600">
+                {accountData.createdAt
+                  ? new Date(accountData.createdAt).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )
+                  : "Unknown"}
+              </p>
             </div>
 
             <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
@@ -302,20 +473,26 @@ export default function MyAccountPage() {
                   Last Login
                 </span>
               </div>
-              <p className="text-xs text-gray-600">{accountData.lastLogin}</p>
-            </div>
-
-            <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-              <div className="flex items-center gap-3 mb-2">
-                <Globe className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-800">
-                  Session Active
-                </span>
-              </div>
-              <p className="text-xs text-blue-700">
-                3 active sessions across devices
+              <p className="text-xs text-gray-600">
+                {accountData.lastLogin
+                  ? new Date(accountData.lastLogin).toLocaleString()
+                  : "Never"}
               </p>
             </div>
+
+            {accountData.sageConnected && (
+              <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                <div className="flex items-center gap-3 mb-2">
+                  <Globe className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">
+                    Sage Connected
+                  </span>
+                </div>
+                <p className="text-xs text-blue-700">
+                  {accountData.sageCompanies?.length || 0} companies available
+                </p>
+              </div>
+            )}
           </div>
         </Card>
       </div>
@@ -352,11 +529,14 @@ export default function MyAccountPage() {
                   Keep your account secure with a strong password
                 </p>
                 <p className="text-xs text-amber-600 mt-1">
-                  Last updated: 2 weeks ago
+                  Last updated:{" "}
+                  {accountData.updatedAt
+                    ? new Date(accountData.updatedAt).toLocaleDateString()
+                    : "Unknown"}
                 </p>
               </div>
             </div>
-            <Button>
+            <Button onClick={() => setShowPasswordModal(true)}>
               <Lock className="w-4 h-4" />
               Update Password
             </Button>
@@ -394,6 +574,99 @@ export default function MyAccountPage() {
           ))}
         </div>
       </Card>
+
+      {/* Password Update Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/10 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              Update Password
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  value={passwordData.currentPassword}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      currentPassword: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  value={passwordData.newPassword}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      newPassword: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  value={passwordData.confirmNewPassword}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      confirmNewPassword: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button
+                kind="subtle"
+                className="flex-1"
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPasswordData({
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmNewPassword: "",
+                  });
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                kind="primary"
+                className="flex-1"
+                onClick={handlePasswordUpdate}
+                disabled={
+                  !passwordData.currentPassword ||
+                  !passwordData.newPassword ||
+                  !passwordData.confirmNewPassword
+                }
+              >
+                Update Password
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

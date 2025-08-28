@@ -1,14 +1,26 @@
-import { useState } from "react";
-import { Mail, Lock, ArrowRight, Shield } from "lucide-react";
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Mail, Lock, ArrowRight, Shield, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth, useLogin } from "../hooks/useAuth";
 
 const ManagerLogin = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Redux hooks
+  const { isAuthenticated, error, clearError } = useAuth();
+  const { login, isLoading } = useLogin();
+  const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   // Sage theme colors
   const THEME = {
@@ -19,18 +31,24 @@ const ManagerLogin = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    // Clear error when user starts typing
+    if (error) {
+      clearError();
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      console.log("Manager login data:", { ...formData, role: "manager" });
-      // TODO: Implement actual login logic and redirect to dashboard
-    } finally {
-      setIsSubmitting(false);
+
+    const result = await login({
+      email: formData.email,
+      password: formData.password,
+    });
+
+    if (result.success) {
+      console.log("Login successful:", result.user);
+    } else {
+      console.error("Login failed:", result.error);
     }
   };
 
@@ -71,8 +89,9 @@ const ManagerLogin = () => {
                   Manager Portal
                 </h2>
                 <p className="text-emerald-100 text-lg leading-relaxed">
-                  Access your store management dashboard to handle daily operations, 
-                  track sales, manage inventory, and serve customers efficiently.
+                  Access your store management dashboard to handle daily
+                  operations, track sales, manage inventory, and serve customers
+                  efficiently.
                 </p>
               </div>
 
@@ -107,6 +126,20 @@ const ManagerLogin = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Error Message */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3"
+                    >
+                      <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                      <span className="text-red-700 text-sm">{error}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address
@@ -167,11 +200,11 @@ const ManagerLogin = () => {
                   whileTap={{ scale: 0.98 }}
                   whileHover={{ scale: 1.01 }}
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isLoading}
                   className="w-full py-3 px-4 rounded-xl text-white font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:ring-offset-2 transition-all duration-200"
                   style={{ backgroundColor: THEME.primary }}
                 >
-                  {isSubmitting ? (
+                  {isLoading ? (
                     <div className="flex items-center justify-center">
                       <svg
                         className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -197,7 +230,8 @@ const ManagerLogin = () => {
                     </div>
                   ) : (
                     <div className="flex items-center justify-center">
-                      Sign In to POS System <ArrowRight className="ml-2 w-4 h-4" />
+                      Sign In to POS System{" "}
+                      <ArrowRight className="ml-2 w-4 h-4" />
                     </div>
                   )}
                 </motion.button>

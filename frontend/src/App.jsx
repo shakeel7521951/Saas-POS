@@ -1,4 +1,5 @@
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import "./App.css";
 import "./hide-scrollbar.css";
 import Login from "./pages/Login";
@@ -7,7 +8,6 @@ import AdminLogin from "./pages/AdminLogin";
 import Signup from "./pages/Signup";
 import Sidebar from "./components/pos/Sidebar";
 import HomePage from "./pages/Homepage";
-
 import POSTransaction from "./pages/POSTransaction";
 import { useEffect, useState } from "react";
 import {
@@ -24,6 +24,7 @@ import {
 } from "./components/common/dashboard-main/DataPages.jsx";
 import MyAccountPage from "./components/common/dashboard-main/MyAccount.jsx";
 import BillingSubscriptionPage from "./components/common/dashboard-main/BillingPage.jsx";
+import SageIntegrationPage from "./pages/SageIntegrationPage.jsx";
 
 // Admin Components
 import AdminSidebar from "./components/admin/AdminSidebar";
@@ -34,6 +35,12 @@ import SubscriptionsPlans from "./pages/admin/SubscriptionsPlans";
 import BillingPayments from "./pages/admin/BillingPayments";
 import SageIntegrations from "./pages/admin/SageIntegrations";
 import Reports from "./pages/admin/Reports";
+
+// Protected Route Components
+import {
+  AuthenticatedRoute,
+  AdminRoute,
+} from "./components/common/ProtectedRoute";
 
 const AdminFunction = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -98,8 +105,13 @@ const MainFunction = () => {
 };
 
 const router = createBrowserRouter([
+  // Manager/User Routes (Protected)
   {
-    element: <MainFunction />,
+    element: (
+      <AuthenticatedRoute>
+        <MainFunction />
+      </AuthenticatedRoute>
+    ),
     children: [
       { path: "", element: <HomePage /> },
       { path: "dashboard", element: <HomePage /> },
@@ -115,14 +127,19 @@ const router = createBrowserRouter([
         path: "/account/billing-subscription",
         element: <BillingSubscriptionPage />,
       },
+      { path: "/integrations/sage", element: <SageIntegrationPage /> },
       { path: "/pos-transaction", element: <POSTransaction /> },
     ],
   },
 
-  // Admin Routes
+  // Admin Routes (Protected - Admin Only)
   {
     path: "/admin",
-    element: <AdminFunction />,
+    element: (
+      <AdminRoute>
+        <AdminFunction />
+      </AdminRoute>
+    ),
     children: [
       { path: "", element: <AdminDashboard /> },
       { path: "dashboard", element: <AdminDashboard /> },
@@ -136,6 +153,7 @@ const router = createBrowserRouter([
     ],
   },
 
+  // Public Routes
   { path: "/login", element: <Login /> },
   { path: "/manager/login", element: <ManagerLogin /> },
   { path: "/admin/login", element: <AdminLogin /> },
@@ -143,7 +161,33 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+          },
+          success: {
+            duration: 3000,
+            style: {
+              background: "#10b981",
+            },
+          },
+          error: {
+            duration: 5000,
+            style: {
+              background: "#ef4444",
+            },
+          },
+        }}
+      />
+    </>
+  );
 }
 
 export default App;

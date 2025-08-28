@@ -16,12 +16,16 @@ import {
   Users,
   AlertTriangle,
 } from "lucide-react";
+import { useAuth, useLogout } from "../../hooks/useAuth";
 
 const AdminTopBar = ({ toggleSidebar }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Redux hooks
+  const { user } = useAuth();
+  const { logout } = useLogout();
 
   const THEME = {
     primary: "#007a5a",
@@ -29,7 +33,31 @@ const AdminTopBar = ({ toggleSidebar }) => {
     success: "#10b981",
   };
 
-  // Sample notifications
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user) return "A";
+    const firstName = user.firstName || "";
+    const lastName = user.lastName || "";
+    return (firstName[0] || "") + (lastName[0] || "");
+  };
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (!user) return "Admin User";
+    return (
+      user.fullName ||
+      `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+      user.email
+    );
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    setShowUserMenu(false);
+  };
+
+  // Sample notifications - personalized for the user
   const notifications = [
     {
       id: 1,
@@ -43,7 +71,9 @@ const AdminTopBar = ({ toggleSidebar }) => {
       id: 2,
       type: "info",
       title: "New Signup",
-      message: "TechStart Solutions joined",
+      message: `${
+        user?.companyName || "TechStart Solutions"
+      } joined the platform`,
       time: "1 hour ago",
       unread: true,
     },
@@ -53,6 +83,16 @@ const AdminTopBar = ({ toggleSidebar }) => {
       title: "Payment Received",
       message: "$1,149 from Metro Retail Group",
       time: "3 hours ago",
+      unread: false,
+    },
+    {
+      id: 4,
+      type: "info",
+      title: "Welcome",
+      message: `Welcome ${
+        user?.firstName || "Admin"
+      }, you have admin privileges`,
+      time: "1 day ago",
       unread: false,
     },
   ];
@@ -218,13 +258,15 @@ const AdminTopBar = ({ toggleSidebar }) => {
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-50 transition-colors"
             >
-              <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center text-white text-sm font-medium">
+                {getUserInitials()}
               </div>
               <div className="hidden md:block text-left">
-                <p className="text-xs font-medium text-gray-900">Admin User</p>
+                <p className="text-xs font-medium text-gray-900">
+                  {getUserDisplayName()}
+                </p>
                 <p className="text-xs text-gray-500 font-light">
-                  System Administrator
+                  {user?.role === "admin" ? "System Administrator" : "User"}
                 </p>
               </div>
               <ChevronDown className="w-4 h-4 text-gray-400" />
@@ -240,18 +282,18 @@ const AdminTopBar = ({ toggleSidebar }) => {
               >
                 <div className="px-4 py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-white" />
+                    <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center text-white font-medium">
+                      {getUserInitials()}
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">
-                        Admin User
+                        {getUserDisplayName()}
                       </p>
                       <p className="text-xs text-gray-500 font-light">
-                        admin@company.com
+                        {user?.email || "admin@company.com"}
                       </p>
-                      <p className="text-xs text-emerald-600 font-medium">
-                        System Administrator
+                      <p className="text-xs text-emerald-600 font-medium capitalize">
+                        {user?.role || "Administrator"}
                       </p>
                     </div>
                   </div>
@@ -273,7 +315,10 @@ const AdminTopBar = ({ toggleSidebar }) => {
                 </div>
 
                 <div className="border-t border-gray-100 py-2">
-                  <button className="w-full flex items-center space-x-3 px-4 py-3 text-xs font-normal text-red-600 hover:bg-red-50 transition-colors">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center space-x-3 px-4 py-3 text-xs font-normal text-red-600 hover:bg-red-50 transition-colors"
+                  >
                     <LogOut className="w-4 h-4" />
                     <span>Sign Out</span>
                   </button>

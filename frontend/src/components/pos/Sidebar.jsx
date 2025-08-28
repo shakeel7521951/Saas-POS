@@ -16,6 +16,8 @@ import {
   ChevronUp,
   Menu,
   X,
+  Zap,
+  Settings,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -24,6 +26,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     transactions: false,
     data: false,
     billing: false,
+    integrations: false,
   });
 
   const toggleDropdown = (dropdown) => {
@@ -228,6 +231,44 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                           className="flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-green-50 hover:text-green-700"
                         >
                           <CreditCard size={16} /> Billing & Subscription
+                        </Link>
+                      </li>
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              </li>
+
+              {/* Integrations Dropdown */}
+              <li>
+                <button
+                  onClick={() => toggleDropdown("integrations")}
+                  className="flex items-center justify-between w-full p-3 rounded-md text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
+                >
+                  <span className="flex items-center gap-3">
+                    <Zap size={18} />
+                    Integrations
+                  </span>
+                  {openDropdowns.integrations ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
+                </button>
+                <AnimatePresence>
+                  {openDropdowns.integrations && (
+                    <motion.ul
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="ml-8 mt-1 space-y-1"
+                    >
+                      <li>
+                        <Link
+                          to="/integrations/sage"
+                          className="flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-green-50 hover:text-green-700"
+                        >
+                          <Settings size={16} /> Sage Integration
                         </Link>
                       </li>
                     </motion.ul>
