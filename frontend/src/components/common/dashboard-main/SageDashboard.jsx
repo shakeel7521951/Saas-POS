@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -10,7 +10,6 @@ import {
   Building2,
   Users,
   Boxes,
-  Warehouse,
   CreditCard,
   TrendingUp,
   CircleCheck,
@@ -33,6 +32,8 @@ import {
   Line,
   Legend,
 } from "recharts";
+import { useAuth } from "../../../hooks/useAuth";
+import { useSage } from "../../../hooks/useSage";
 
 // Utility formatters
 const formatCurrency = (n) =>
@@ -40,7 +41,13 @@ const formatCurrency = (n) =>
     n
   );
 const formatNumber = (n) => new Intl.NumberFormat("en-US").format(n);
-const formatDate = (iso) => new Date(iso).toLocaleDateString();
+const formatDate = (iso) => {
+  const date = new Date(iso);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 // Theme tokens (Sage-like)
 const COLORS = {
@@ -57,38 +64,7 @@ const COLORS = {
   teal50: "#dff5ec",
 };
 
-// Dummy data
-const username = "Logic Town";
-const connectedCompanies = [
-  { id: 1, name: "Sage Demo Ltd." },
-  { id: 2, name: "GreenLeaf Trading" },
-];
-const lastSyncTime = new Date(Date.now() - 1000 * 60 * 42).toISOString(); // 42 minutes ago
-
-const stats = {
-  companies: connectedCompanies.length,
-  customers: 1280,
-  items: 5460,
-  warehouses: 7,
-  todaySales: 18420,
-  pendingInvoices: 14,
-};
-
-const salesTrend = [
-  { month: "Jan", sales: 12000 },
-  { month: "Feb", sales: 14500 },
-  { month: "Mar", sales: 13800 },
-  { month: "Apr", sales: 16000 },
-  { month: "May", sales: 15200 },
-  { month: "Jun", sales: 17500 },
-  { month: "Jul", sales: 19000 },
-  { month: "Aug", sales: 21000 },
-  { month: "Sep", sales: 20500 },
-  { month: "Oct", sales: 21800 },
-  { month: "Nov", sales: 23000 },
-  { month: "Dec", sales: 24500 },
-];
-
+// Dummy data (keeping only what's still used for other charts)
 const revenueSources = [
   { name: "Invoices", value: 48 },
   { name: "Orders", value: 28 },
@@ -168,6 +144,42 @@ const Card = ({ children, className = "" }) => (
   </div>
 );
 
+const Shimmer = ({ className = "" }) => (
+  <div
+    className={`animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] rounded ${className}`}
+    style={{
+      backgroundImage:
+        "linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%)",
+      animation: "shimmer 2s infinite",
+    }}
+  >
+    <style jsx>{`
+      @keyframes shimmer {
+        0% {
+          background-position: -200% 0;
+        }
+        100% {
+          background-position: 200% 0;
+        }
+      }
+    `}</style>
+  </div>
+);
+
+const MetricCardShimmer = () => (
+  <Card className="p-4">
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex-1">
+        <Shimmer className="h-3 w-20 mb-2" />
+        <Shimmer className="h-8 w-16" />
+      </div>
+      <div className="p-2">
+        <Shimmer className="w-10 h-10 rounded-lg" />
+      </div>
+    </div>
+  </Card>
+);
+
 const SectionTitle = ({ title, subtitle, right }) => (
   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
     <div>
@@ -208,6 +220,148 @@ const StatusPill = ({ status }) => {
 };
 
 export default function SageDashboard() {
+  // Get real data from hooks
+  const { user } = useAuth();
+
+  // Add syncing state
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [monthlySalesData, setMonthlySalesData] = useState([]);
+  const [salesTrendLoading, setSalesTrendLoading] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState("6months");
+  const {
+    isConnected,
+    activeCompany,
+    connectedAt,
+    companies,
+    totalItems,
+    itemsLoading,
+    totalCustomers,
+    customersLoading,
+    customers,
+    totalSales,
+    salesLoading,
+    fetchTodaysSales,
+    fetchMonthlySales,
+    syncAll,
+  } = useSage();
+
+  // Fetch today's sales when connected
+  useEffect(() => {
+    if (isConnected && fetchTodaysSales) {
+      fetchTodaysSales();
+    }
+  }, [isConnected, fetchTodaysSales]);
+
+  // Fetch monthly sales trend when connected or period changes
+  useEffect(() => {
+    const loadMonthlySales = async () => {
+      if (isConnected && fetchMonthlySales) {
+        setSalesTrendLoading(true);
+        try {
+          const months =
+            selectedPeriod === "3months"
+              ? 3
+              : selectedPeriod === "12months"
+              ? 12
+              : 6;
+          const result = await fetchMonthlySales(months);
+          if (result.success) {
+            setMonthlySalesData(result.data);
+          }
+        } catch (error) {
+          console.error("Failed to load monthly sales:", error);
+        } finally {
+          setSalesTrendLoading(false);
+        }
+      }
+    };
+
+    loadMonthlySales();
+  }, [isConnected, fetchMonthlySales, selectedPeriod]);
+
+  // Handle sync all data
+  const handleSyncNow = async () => {
+    if (isConnected && syncAll) {
+      setIsSyncing(true);
+      try {
+        await syncAll();
+        // Also refresh monthly sales data
+        if (fetchMonthlySales) {
+          setSalesTrendLoading(true);
+          const months =
+            selectedPeriod === "3months"
+              ? 3
+              : selectedPeriod === "12months"
+              ? 12
+              : 6;
+          const result = await fetchMonthlySales(months);
+          if (result.success) {
+            setMonthlySalesData(result.data);
+          }
+          setSalesTrendLoading(false);
+        }
+      } catch (error) {
+        console.error("Sync failed:", error);
+        setSalesTrendLoading(false);
+      } finally {
+        setIsSyncing(false);
+      }
+    }
+  };
+
+  // Format the user's name for welcome message
+  const getUserDisplayName = () => {
+    if (!user) return "User";
+    return (
+      user.fullName ||
+      `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+      user.email ||
+      "User"
+    );
+  };
+
+  // Get connected company names
+  const getConnectedCompanies = () => {
+    if (activeCompany) {
+      return [activeCompany.companyName];
+    }
+    return companies?.map((c) => c.companyName) || [];
+  };
+
+  // Calculate total pending invoices from customer balances
+  const calculatePendingInvoices = () => {
+    if (
+      !isConnected ||
+      customersLoading ||
+      !customers ||
+      customers.length === 0
+    ) {
+      return 0;
+    }
+    return customers.reduce((total, customer) => {
+      return total + (customer.balance || 0);
+    }, 0);
+  };
+
+  // Get stats data
+  const getStats = () => ({
+    companies: companies?.length || 0,
+    customers: isConnected && !customersLoading ? totalCustomers : 0, // Use real customers count from Sage
+    items: isConnected && !itemsLoading ? totalItems : 0, // Use real items count from Sage
+    todaySales: isConnected && !salesLoading ? totalSales : 0, // Use real sales from Sage
+    pendingInvoices: calculatePendingInvoices(), // Use real customer balances
+  });
+
+  // Format last sync time
+  const getLastSyncTime = () => {
+    if (connectedAt) {
+      return new Date(connectedAt).toISOString();
+    }
+    return new Date(Date.now() - 1000 * 60 * 42).toISOString(); // fallback
+  };
+
+  const stats = getStats();
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: COLORS.bg }}>
       <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
@@ -216,19 +370,38 @@ export default function SageDashboard() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
-                Welcome, {username}
+                Welcome, {getUserDisplayName()}
               </h2>
               <p className="text-sm text-gray-500 mt-1">
-                Connected to: {connectedCompanies.map((c) => c.name).join(", ")}{" "}
-                · Last Sync: {formatDate(lastSyncTime)}
+                {activeCompany ? (
+                  <>
+                    Connected to: {activeCompany.companyName} · Last Sync:{" "}
+                    {formatDate(getLastSyncTime())}
+                  </>
+                ) : (
+                  <>
+                    {isConnected ? (
+                      <>
+                        Companies: {getConnectedCompanies().join(", ")} · Last
+                        Sync: {formatDate(getLastSyncTime())}
+                      </>
+                    ) : (
+                      "Not connected to Sage"
+                    )}
+                  </>
+                )}
               </p>
             </div>
             <button
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-white shadow transition-colors"
+              onClick={handleSyncNow}
+              disabled={isSyncing}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-white shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ backgroundColor: COLORS.primary }}
             >
-              <RefreshCw className="h-4 w-4" />
-              Sync Now
+              <RefreshCw
+                className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+              />
+              {isSyncing ? "Syncing..." : "Sync Now"}
             </button>
           </div>
         </Card>
@@ -265,38 +438,57 @@ export default function SageDashboard() {
         </div>
 
         {/* Key Stats / Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-1 mb-8">
           <MetricCard
             icon={<Building2 className="h-5 w-5" />}
             label="Total Companies"
             value={stats.companies}
           />
-          <MetricCard
-            icon={<Users className="h-5 w-5" />}
-            label="Total Customers"
-            value={formatNumber(stats.customers)}
-          />
-          <MetricCard
-            icon={<Boxes className="h-5 w-5" />}
-            label="Total Items"
-            value={formatNumber(stats.items)}
-          />
-          <MetricCard
-            icon={<Warehouse className="h-5 w-5" />}
-            label="Total Warehouses"
-            value={formatNumber(stats.warehouses)}
-          />
-          <MetricCard
-            icon={<CreditCard className="h-5 w-5" />}
-            label="Today’s Sales"
-            value={formatCurrency(stats.todaySales)}
-            accent
-          />
-          <MetricCard
-            icon={<FileText className="h-5 w-5" />}
-            label="Pending Invoices"
-            value={formatNumber(stats.pendingInvoices)}
-          />
+
+          {/* Customers Metric with Shimmer */}
+          {customersLoading ? (
+            <MetricCardShimmer />
+          ) : (
+            <MetricCard
+              icon={<Users className="h-5 w-5" />}
+              label="Total Customers"
+              value={formatNumber(stats.customers)}
+            />
+          )}
+
+          {/* Items Metric with Shimmer */}
+          {itemsLoading ? (
+            <MetricCardShimmer />
+          ) : (
+            <MetricCard
+              icon={<Boxes className="h-5 w-5" />}
+              label="Total Items"
+              value={formatNumber(stats.items)}
+            />
+          )}
+
+          {/* Today's Sales Metric with Shimmer */}
+          {salesLoading ? (
+            <MetricCardShimmer />
+          ) : (
+            <MetricCard
+              icon={<CreditCard className="h-5 w-5" />}
+              label="Today's Sales"
+              value={formatCurrency(stats.todaySales)}
+              accent
+            />
+          )}
+
+          {/* Pending Invoices Metric with Shimmer */}
+          {customersLoading ? (
+            <MetricCardShimmer />
+          ) : (
+            <MetricCard
+              icon={<FileText className="h-5 w-5" />}
+              label="Pending Invoices"
+              value={formatCurrency(stats.pendingInvoices)}
+            />
+          )}
         </div>
 
         {/* Charts Row */}
@@ -308,62 +500,114 @@ export default function SageDashboard() {
               subtitle="Monthly performance metrics"
               right={
                 <div className="flex gap-2">
-                  {["Month", "Quarter", "Year"].map((t) => (
+                  {[
+                    { label: "3M", value: "3months" },
+                    { label: "6M", value: "6months" },
+                    { label: "1Y", value: "12months" },
+                  ].map((period) => (
                     <button
-                      key={t}
-                      className="px-3 py-1 text-sm rounded-lg bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100"
+                      key={period.value}
+                      onClick={() => setSelectedPeriod(period.value)}
+                      className={`px-3 py-1 text-sm rounded-lg border transition-colors ${
+                        selectedPeriod === period.value
+                          ? "bg-green-50 border-green-200 text-green-700"
+                          : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                      }`}
                     >
-                      {t}
+                      {period.label}
                     </button>
                   ))}
                 </div>
               }
             />
             <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={salesTrend}
-                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="salesColor" x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="0%"
-                        stopColor={COLORS.primary}
-                        stopOpacity={0.35}
-                      />
-                      <stop
-                        offset="100%"
-                        stopColor={COLORS.primary}
-                        stopOpacity={0.05}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="month"
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                    axisLine={{ stroke: COLORS.border }}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 12 }}
-                    tickFormatter={(v) => (v >= 1000 ? `${v / 1000}k` : v)}
-                    tickLine={false}
-                    axisLine={{ stroke: COLORS.border }}
-                  />
-                  <Tooltip
-                    formatter={(v) => [formatCurrency(v), "Sales"]}
-                    cursor={{ stroke: COLORS.primary, strokeOpacity: 0.15 }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="sales"
-                    stroke={COLORS.primary}
-                    fill="url(#salesColor)"
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {salesTrendLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={monthlySalesData}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient
+                        id="salesColor"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor={COLORS.primary}
+                          stopOpacity={0.35}
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor={COLORS.primary}
+                          stopOpacity={0.05}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={{ stroke: COLORS.border }}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={(v) => (v >= 1000 ? `${v / 1000}k` : v)}
+                      tickLine={false}
+                      axisLine={{ stroke: COLORS.border }}
+                    />
+                    <Tooltip
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
+                              <p className="font-medium text-gray-900 mb-1">
+                                {label}
+                              </p>
+                              <p className="text-sm">
+                                <span className="text-gray-600">Sales: </span>
+                                <span
+                                  className="font-medium"
+                                  style={{ color: COLORS.primary }}
+                                >
+                                  {formatCurrency(payload[0].value)}
+                                </span>
+                              </p>
+                              {payload[0].payload.itemsSold && (
+                                <p className="text-sm">
+                                  <span className="text-gray-600">
+                                    Items Sold:{" "}
+                                  </span>
+                                  <span className="font-medium">
+                                    {payload[0].payload.itemsSold}
+                                  </span>
+                                </p>
+                              )}
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="sales"
+                      stroke={COLORS.primary}
+                      fill="url(#salesColor)"
+                      strokeWidth={2}
+                      dot={{ fill: COLORS.primary, r: 4 }}
+                      activeDot={{ r: 6, fill: COLORS.primary }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </Card>
 

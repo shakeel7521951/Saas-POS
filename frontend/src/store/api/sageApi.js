@@ -16,7 +16,13 @@ export const sageApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["SageConnection", "SageCompanies"],
+  tagTypes: [
+    "SageConnection",
+    "SageCompanies",
+    "SageItems",
+    "SageCustomers",
+    "SageSales",
+  ],
   endpoints: (builder) => ({
     // Connect Sage with Account Credentials
     connectSageWithApiKey: builder.mutation({
@@ -68,7 +74,43 @@ export const sageApi = createApi({
         body: { companyId },
       }),
       transformResponse: (response) => response,
-      invalidatesTags: ["SageConnection", "SageCompanies"],
+      invalidatesTags: [
+        "SageConnection",
+        "SageCompanies",
+        "SageItems",
+        "SageCustomers",
+      ],
+    }),
+
+    // Get Sage items
+    getSageItems: builder.query({
+      query: () => ({
+        url: "/items",
+        method: "GET",
+      }),
+      transformResponse: (response) => response,
+      providesTags: ["SageItems"],
+    }),
+
+    // Get Sage customers
+    getSageCustomers: builder.query({
+      query: () => ({
+        url: "/customers",
+        method: "GET",
+      }),
+      transformResponse: (response) => response,
+      providesTags: ["SageCustomers"],
+    }),
+
+    // Get Sage sales data
+    getSageSales: builder.mutation({
+      query: (dateRange) => ({
+        url: "/sales",
+        method: "POST",
+        body: dateRange, // { FromDate, ToDate } or empty for today
+      }),
+      transformResponse: (response) => response,
+      invalidatesTags: ["SageSales"],
     }),
   }),
 });
@@ -79,4 +121,7 @@ export const {
   useGetSageCompaniesQuery,
   useDisconnectSageMutation,
   useSwitchActiveCompanyMutation,
+  useGetSageItemsQuery,
+  useGetSageCustomersQuery,
+  useGetSageSalesMutation,
 } = sageApi;
