@@ -18,14 +18,15 @@ export const sageApi = createApi({
   }),
   tagTypes: ["SageConnection", "SageCompanies"],
   endpoints: (builder) => ({
-    // Get Sage OAuth URL
-    getSageAuthUrl: builder.query({
-      query: () => ({
-        url: "/auth-url",
-        method: "GET",
+    // Connect Sage with Account Credentials
+    connectSageWithApiKey: builder.mutation({
+      query: (credentials) => ({
+        url: "/connect",
+        method: "POST",
+        body: credentials, // { email, password, apiKey }
       }),
       transformResponse: (response) => response,
-      keepUnusedDataFor: 0, // Don't cache this query
+      invalidatesTags: ["SageConnection", "SageCompanies"],
     }),
 
     // Get Sage connection status
@@ -40,9 +41,10 @@ export const sageApi = createApi({
 
     // Get Sage companies
     getSageCompanies: builder.query({
-      query: () => ({
+      query: (refresh = false) => ({
         url: "/companies",
         method: "GET",
+        params: refresh ? { refresh: "true" } : {},
       }),
       transformResponse: (response) => response,
       providesTags: ["SageCompanies"],
@@ -56,16 +58,6 @@ export const sageApi = createApi({
       }),
       transformResponse: (response) => response,
       invalidatesTags: ["SageConnection", "SageCompanies"],
-    }),
-
-    // Refresh Sage token
-    refreshSageToken: builder.mutation({
-      query: () => ({
-        url: "/refresh-token",
-        method: "POST",
-      }),
-      transformResponse: (response) => response,
-      invalidatesTags: ["SageConnection"],
     }),
 
     // Switch active company
@@ -82,10 +74,9 @@ export const sageApi = createApi({
 });
 
 export const {
-  useGetSageAuthUrlQuery,
+  useConnectSageWithApiKeyMutation,
   useGetSageStatusQuery,
   useGetSageCompaniesQuery,
   useDisconnectSageMutation,
-  useRefreshSageTokenMutation,
   useSwitchActiveCompanyMutation,
 } = sageApi;

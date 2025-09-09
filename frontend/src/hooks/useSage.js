@@ -1,35 +1,31 @@
 import { useCallback } from "react";
 import {
-  useGetSageAuthUrlQuery,
+  useConnectSageWithApiKeyMutation,
   useGetSageStatusQuery,
   useGetSageCompaniesQuery,
   useDisconnectSageMutation,
-  useRefreshSageTokenMutation,
   useSwitchActiveCompanyMutation,
 } from "../store/api/sageApi";
 
-export const useSageAuth = () => {
-  const {
-    data: authResponse,
-    isLoading: isLoadingAuthUrl,
-    error: authUrlError,
-  } = useGetSageAuthUrlQuery();
+export const useSageConnection = () => {
+  const [connectSage, { isLoading: isConnecting }] =
+    useConnectSageWithApiKeyMutation();
 
-  const redirectToSage = useCallback(() => {
-    console.log("redirectToSage called", { authResponse });
-    if (authResponse?.authUrl) {
-      console.log("Redirecting to:", authResponse.authUrl);
-      window.location.href = authResponse.authUrl;
-    } else {
-      console.error("No authUrl available for redirect");
-    }
-  }, [authResponse]);
+  const handleConnect = useCallback(
+    async (credentials) => {
+      try {
+        const result = await connectSage(credentials).unwrap();
+        return { success: true, data: result };
+      } catch (error) {
+        throw new Error(error.data?.message || "Failed to connect to Sage");
+      }
+    },
+    [connectSage]
+  );
 
   return {
-    authUrl: authResponse?.authUrl,
-    isLoadingAuthUrl,
-    authUrlError,
-    redirectToSage,
+    connectToSage: handleConnect,
+    isConnecting,
   };
 };
 
@@ -48,12 +44,11 @@ export const useSageStatus = () => {
     activeCompanyId: status?.activeCompanyId,
     activeCompany: status?.activeCompany,
     companiesCount: status?.companiesCount || 0,
-    tokenExpiry: status?.tokenExpires,
-    isTokenExpired: status?.isTokenExpired || false,
+    connectedAt: status?.connectedAt,
     // Add backward compatibility properties
     companyName: status?.activeCompany?.name,
     companyId: status?.activeCompanyId,
-    connectionDate: status?.createdAt,
+    connectionDate: status?.connectedAt,
     isLoading,
     error,
     refetch,
@@ -81,8 +76,6 @@ export const useSageCompanies = () => {
 export const useSageActions = () => {
   const [disconnectSage, { isLoading: isDisconnecting }] =
     useDisconnectSageMutation();
-  const [refreshToken, { isLoading: isRefreshing }] =
-    useRefreshSageTokenMutation();
   const [switchCompany, { isLoading: isSwitchingCompany }] =
     useSwitchActiveCompanyMutation();
 
@@ -97,18 +90,6 @@ export const useSageActions = () => {
       };
     }
   }, [disconnectSage]);
-
-  const handleRefreshToken = useCallback(async () => {
-    try {
-      const result = await refreshToken().unwrap();
-      return { success: true, data: result };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.data?.message || "Failed to refresh Sage token",
-      };
-    }
-  }, [refreshToken]);
 
   const handleSwitchCompany = useCallback(
     async (companyId) => {
@@ -127,23 +108,21 @@ export const useSageActions = () => {
 
   return {
     disconnect: handleDisconnect,
-    refreshToken: handleRefreshToken,
     switchCompany: handleSwitchCompany,
     isDisconnecting,
-    isRefreshing,
     isSwitchingCompany,
   };
 };
 
 // Combined hook for convenience
 export const useSage = () => {
-  const auth = useSageAuth();
+  const connection = useSageConnection();
   const status = useSageStatus();
   const companies = useSageCompanies();
   const actions = useSageActions();
 
   return {
-    ...auth,
+    ...connection,
     ...status,
     ...companies,
     ...actions,

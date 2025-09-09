@@ -1,179 +1,187 @@
 const User = require("../models/User");
 const axios = require("axios");
 
-// Sage OAuth Configuration
+// Sage API Configuration
 const SAGE_CONFIG = {
-  clientId: process.env.SAGE_CLIENT_ID,
-  clientSecret: process.env.SAGE_CLIENT_SECRET,
-  redirectUri:
-    process.env.SAGE_REDIRECT_URI || "http://localhost:3000/auth/sage/callback",
-  baseUrl: process.env.SAGE_BASE_URL || "https://www.sageone.com",
-  apiUrl: process.env.SAGE_API_URL || "https://api.sageone.com/accounts/v1",
-  scope: "full_access",
+  baseUrl: "http://resellers.accounting.sageone.co.za/api/2.0.0",
+  companiesEndpoint: "/Company/Get",
+  // Add other endpoints as needed
 };
 
-// @desc    Get Sage OAuth URL
-// @route   GET /api/sage/auth-url
+// Helper function to create Sage API headers with user credentials
+const createSageHeaders = (user) => {
+  const authString = Buffer.from(
+    `${user.sageEmail}:${user.sagePassword}`
+  ).toString("base64");
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Basic ${authString}`,
+  };
+};
+
+// Helper function to make Sage API calls with user credentials
+const makeSageApiCall = async (user, endpoint, params = {}) => {
+  const headers = createSageHeaders(user);
+  const apiParams = { ...params, apiKey: user.sageApiKey };
+
+  let response = await axios.get(`${SAGE_CONFIG.baseUrl}${endpoint}`, {
+    params: apiParams,
+    headers: headers,
+  });
+  console.log("Sage API response:", response.data);
+  return response;
+};
+
+// @desc    Connect Sage with Account Credentials
+// @route   POST /api/sage/connect
 // @access  Private
-const getSageAuthUrl = async (req, res, next) => {
+const connectSageWithApiKey = async (req, res, next) => {
   try {
-    const state = req.user.id; // Use user ID as state for security
+    const { email, password, apiKey } = req.body;
 
-    const authUrl = `${
-      SAGE_CONFIG.baseUrl
-    }/oauth2/auth/central?response_type=code&client_id=${
-      SAGE_CONFIG.clientId
-    }&redirect_uri=${encodeURIComponent(SAGE_CONFIG.redirectUri)}&scope=${
-      SAGE_CONFIG.scope
-    }&state=${state}`;
-
-    res.status(200).json({
-      success: true,
-      authUrl,
-      message: "Sage authorization URL generated successfully",
-    });
-  } catch (error) {
-    console.error("Get Sage auth URL error:", error);
-    next(error);
-  }
-};
-
-// @desc    Handle Sage OAuth callback
-// @route   POST /api/sage/callback
-// @access  Public (but validates state)
-const handleSageCallback = async (req, res, next) => {
-  try {
-    const { code, state, error } = req.body;
-
-    if (error) {
+    if (!email || !password || !apiKey) {
       return res.status(400).json({
         success: false,
-        message: `Sage OAuth error: ${error}`,
+        message: "Email, password, and API Key are all required",
       });
     }
 
-    if (!code || !state) {
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
       return res.status(400).json({
         success: false,
-        message: "Missing authorization code or state",
+        message: "Invalid email format",
       });
     }
 
-    // Find user by state (user ID)
-    const user = await User.findById(state);
-    if (!user) {
-      return res.status(404).json({
+    // Validate API key format (should be UUID)
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(apiKey)) {
+      return res.status(400).json({
         success: false,
-        message: "Invalid state parameter",
+        message: "Invalid API Key format. Expected UUID format.",
       });
     }
 
-    // Exchange code for access token
-    const tokenResponse = await axios.post(
-      `${SAGE_CONFIG.baseUrl}/oauth2/auth/central/token`,
-      {
-        client_id: SAGE_CONFIG.clientId,
-        client_secret: SAGE_CONFIG.clientSecret,
-        code,
-        grant_type: "authorization_code",
-        redirect_uri: SAGE_CONFIG.redirectUri,
-      },
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
+    // Test the credentials by fetching companies
+    try {
+      // Create a temporary user object for testing
+      const testUser = {
+        sageEmail: email,
+        sagePassword: password,
+        sageApiKey: apiKey,
+      };
+      const companiesResponse = await makeSageApiCall(
+        testUser,
+        SAGE_CONFIG.companiesEndpoint
+      );
+      const companiesData = companiesResponse.data;
 
-    const { access_token, refresh_token, expires_in } = tokenResponse.data;
-
-    // Get user info from Sage
-    const userInfoResponse = await axios.get(`${SAGE_CONFIG.apiUrl}/user`, {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-        "X-Site": "gb", // Adjust based on region
-      },
-    });
-
-    const sageUser = userInfoResponse.data;
-
-    // Get companies from Sage
-    const companiesResponse = await axios.get(
-      `${SAGE_CONFIG.apiUrl}/companies`,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          "X-Site": "gb",
-        },
-      }
-    );
-
-    const companies = companiesResponse.data;
-
-    // Update user with Sage information and companies
-    user.sageConnected = true;
-    user.sageAccessToken = access_token;
-    user.sageRefreshToken = refresh_token;
-    user.sageTokenExpires = new Date(Date.now() + expires_in * 1000);
-    user.sageUserId = sageUser.id;
-    user.sageSubscriptionKey = sageUser.subscription_key;
-
-    // Clear existing companies and add new ones
-    user.sageCompanies = [];
-
-    // Add all available companies
-    if (companies && companies.length > 0) {
-      for (const company of companies) {
-        await user.addSageCompany({
-          companyId: company.id,
-          companyName: company.name,
-          companyDatabase: company.database_name || company.id,
+      // Find user and update with Sage information
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
         });
       }
+
+      // Update user with Sage information
+      user.sageConnected = true;
+      user.sageEmail = email;
+      user.sagePassword = password; // In production, consider encrypting this
+      user.sageApiKey = apiKey;
+      user.sageConnectedAt = new Date();
+
+      // Clear existing companies and add new ones
+      user.sageCompanies = [];
+
+      // Handle the response structure - check if it has Results array
+      let companies = [];
+      if (
+        companiesData &&
+        companiesData.Results &&
+        Array.isArray(companiesData.Results)
+      ) {
+        companies = companiesData.Results;
+      } else if (companiesData && Array.isArray(companiesData)) {
+        companies = companiesData;
+      }
+
+      console.log("Companies to process:", companies);
+
+      // Add all available companies
+      if (companies.length > 0) {
+        for (const company of companies) {
+          console.log("Processing company:", {
+            ID: company.ID,
+            Name: company.Name,
+            DisplayName: company.DisplayName,
+          });
+          await user.addSageCompany({
+            companyId: String(company.ID), // Ensure it's a string and use the correct field
+            companyName:
+              company.Name || company.DisplayName || `Company ${company.ID}`,
+            companyDatabase: company.DatabaseName || String(company.ID),
+          });
+        }
+      }
+
+      await user.save();
+
+      console.log("User saved with companies:", user.sageCompanies);
+      console.log("Active company ID:", user.activeCompanyId);
+
+      res.status(200).json({
+        success: true,
+        message: "Sage integration connected successfully",
+        user: {
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+          companyName: user.companyName,
+          phone: user.phone,
+          sageConnected: user.sageConnected,
+          activeCompanyId: user.activeCompanyId,
+          isActive: user.isActive,
+          isEmailVerified: user.isEmailVerified,
+          lastLogin: user.lastLogin,
+          createdAt: user.createdAt,
+        },
+        companies: user.sageCompanies || [],
+        activeCompany: user.getActiveCompany(),
+        debug: {
+          companiesProcessed: companies.length,
+          companiesInDb: user.sageCompanies ? user.sageCompanies.length : 0,
+          responseStructure: companiesData ? Object.keys(companiesData) : [],
+        },
+      });
+    } catch (apiError) {
+      console.error("Sage API test error:", apiError);
+
+      if (
+        apiError.response?.status === 401 ||
+        apiError.response?.status === 403
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid credentials. Please check your email, password, and API key.",
+        });
+      }
+
+      return res.status(400).json({
+        success: false,
+        message: "Failed to connect to Sage. Please check your credentials.",
+      });
     }
-
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Sage integration completed successfully",
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-        companyName: user.companyName,
-        phone: user.phone,
-        sageConnected: user.sageConnected,
-        activeCompanyId: user.activeCompanyId,
-        isActive: user.isActive,
-        isEmailVerified: user.isEmailVerified,
-        lastLogin: user.lastLogin,
-        createdAt: user.createdAt,
-      },
-      companies: user.sageCompanies || [],
-      activeCompany: user.getActiveCompany(),
-    });
   } catch (error) {
-    console.error("Sage callback error:", error);
-
-    // Handle specific Sage API errors
-    if (error.response?.status === 401) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid Sage credentials or expired token",
-      });
-    }
-
-    if (error.response?.status === 403) {
-      return res.status(403).json({
-        success: false,
-        message: "Insufficient permissions for Sage access",
-      });
-    }
-
+    console.error("Connect Sage error:", error);
     next(error);
   }
 };
@@ -190,11 +198,10 @@ const disconnectSage = async (req, res, next) => {
         sageCompanies: [],
         activeCompanyId: null,
         $unset: {
-          sageAccessToken: 1,
-          sageRefreshToken: 1,
-          sageTokenExpires: 1,
-          sageUserId: 1,
-          sageSubscriptionKey: 1,
+          sageEmail: 1,
+          sagePassword: 1,
+          sageApiKey: 1,
+          sageConnectedAt: 1,
         },
       },
       { new: true, runValidators: true }
@@ -239,71 +246,10 @@ const getSageStatus = async (req, res, next) => {
       activeCompanyId: user.activeCompanyId,
       activeCompany: activeCompany,
       companiesCount: user.sageCompanies ? user.sageCompanies.length : 0,
-      tokenExpires: user.sageTokenExpires,
-      isTokenExpired: user.sageTokenExpires
-        ? new Date() > user.sageTokenExpires
-        : false,
+      connectedAt: user.sageConnectedAt,
     });
   } catch (error) {
     console.error("Get Sage status error:", error);
-    next(error);
-  }
-};
-
-// @desc    Refresh Sage token
-// @route   POST /api/sage/refresh-token
-// @access  Private
-const refreshSageToken = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user.id).select("+sageRefreshToken");
-
-    if (!user.sageRefreshToken) {
-      return res.status(400).json({
-        success: false,
-        message: "No refresh token available. Please reconnect to Sage.",
-      });
-    }
-
-    // Refresh the token
-    const tokenResponse = await axios.post(
-      `${SAGE_CONFIG.baseUrl}/oauth2/auth/central/token`,
-      {
-        client_id: SAGE_CONFIG.clientId,
-        client_secret: SAGE_CONFIG.clientSecret,
-        refresh_token: user.sageRefreshToken,
-        grant_type: "refresh_token",
-      },
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-
-    const { access_token, refresh_token, expires_in } = tokenResponse.data;
-
-    // Update user with new tokens
-    await User.findByIdAndUpdate(user._id, {
-      sageAccessToken: access_token,
-      sageRefreshToken: refresh_token || user.sageRefreshToken,
-      sageTokenExpires: new Date(Date.now() + expires_in * 1000),
-    });
-
-    res.status(200).json({
-      success: true,
-      message: "Sage token refreshed successfully",
-      tokenExpires: new Date(Date.now() + expires_in * 1000),
-    });
-  } catch (error) {
-    console.error("Refresh Sage token error:", error);
-
-    if (error.response?.status === 400) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid refresh token. Please reconnect to Sage.",
-      });
-    }
-
     next(error);
   }
 };
@@ -313,13 +259,55 @@ const refreshSageToken = async (req, res, next) => {
 // @access  Private
 const getSageCompanies = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).select("+sageAccessToken");
+    const user = await User.findById(req.user.id).select(
+      "+sageEmail +sagePassword +sageApiKey"
+    );
 
     if (!user.sageConnected) {
       return res.status(400).json({
         success: false,
         message: "Sage not connected. Please connect to Sage first.",
       });
+    }
+
+    // Optionally refresh companies from Sage API
+    if (req.query.refresh === "true") {
+      try {
+        const companiesResponse = await makeSageApiCall(
+          user,
+          SAGE_CONFIG.companiesEndpoint
+        );
+        const companiesData = companiesResponse.data;
+
+        // Handle the response structure - check if it has Results array
+        let companies = [];
+        if (
+          companiesData &&
+          companiesData.Results &&
+          Array.isArray(companiesData.Results)
+        ) {
+          companies = companiesData.Results;
+        } else if (companiesData && Array.isArray(companiesData)) {
+          companies = companiesData;
+        }
+
+        // Update companies in database
+        if (companies.length > 0) {
+          user.sageCompanies = [];
+          for (const company of companies) {
+            await user.addSageCompany({
+              companyId: String(company.ID), // Ensure it's a string
+              companyName:
+                company.Name || company.DisplayName || `Company ${company.ID}`,
+              companyDatabase: company.DatabaseName || String(company.ID),
+            });
+          }
+          await user.save();
+        }
+      } catch (apiError) {
+        console.error("Failed to refresh companies from Sage:", apiError);
+        // Continue with cached companies if API call fails
+      }
     }
 
     res.status(200).json({
@@ -381,11 +369,9 @@ const switchActiveCompany = async (req, res, next) => {
 };
 
 module.exports = {
-  getSageAuthUrl,
-  handleSageCallback,
+  connectSageWithApiKey,
   disconnectSage,
   getSageStatus,
-  refreshSageToken,
   getSageCompanies,
   switchActiveCompany,
 };

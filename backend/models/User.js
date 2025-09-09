@@ -43,27 +43,25 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^\+?[\d\s-()]+$/, "Please provide a valid phone number"],
     },
-    // Sage OAuth Integration Fields
+    // Sage Account Integration Fields
     sageConnected: {
       type: Boolean,
       default: false,
     },
-    sageAccessToken: {
+    sageEmail: {
       type: String,
       select: false, // Don't include in queries by default
     },
-    sageRefreshToken: {
+    sagePassword: {
       type: String,
       select: false, // Don't include in queries by default
     },
-    sageTokenExpires: {
+    sageApiKey: {
+      type: String,
+      select: false, // Don't include in queries by default
+    },
+    sageConnectedAt: {
       type: Date,
-    },
-    sageUserId: {
-      type: String,
-    },
-    sageSubscriptionKey: {
-      type: String,
     },
     // Array of Sage companies the user has access to
     sageCompanies: [
@@ -144,7 +142,6 @@ userSchema.virtual("isLocked").get(function () {
 });
 
 // Index for performance
-userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });
 

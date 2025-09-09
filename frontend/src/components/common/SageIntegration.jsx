@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ExternalLink,
+  Key,
   CheckCircle,
   AlertCircle,
-  RefreshCw,
   Building,
   Calendar,
   Shield,
@@ -12,28 +11,26 @@ import {
   Unlink,
 } from "lucide-react";
 import { useSage } from "../../hooks/useSage";
+import SageCredentialsModal from "./SageCredentialsModal";
 
 const SageIntegration = () => {
   const {
-    isLoadingAuthUrl,
-    authUrlError,
-    redirectToSage,
     isConnected,
     companyName,
     companyId,
-    connectionDate,
-    tokenExpiry,
+    connectedAt,
     isLoading: isLoadingStatus,
     companies,
     isLoading: isLoadingCompanies,
     disconnect,
-    refreshToken,
     isDisconnecting,
-    isRefreshing,
     refetch,
+    connectToSage,
+    isConnecting,
   } = useSage();
 
   const [showConfirmDisconnect, setShowConfirmDisconnect] = useState(false);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
 
   // Auto-refresh status when component mounts
   useEffect(() => {
@@ -41,7 +38,16 @@ const SageIntegration = () => {
   }, [refetch]);
 
   const handleConnect = () => {
-    redirectToSage();
+    setIsApiKeyModalOpen(true);
+  };
+
+  const handleApiKeyConnect = async (apiKey) => {
+    await connectToSage(apiKey);
+    setIsApiKeyModalOpen(false);
+  };
+
+  const handleCloseApiKeyModal = () => {
+    setIsApiKeyModalOpen(false);
   };
 
   const handleDisconnect = async () => {
@@ -50,11 +56,6 @@ const SageIntegration = () => {
       setShowConfirmDisconnect(false);
       refetch();
     }
-  };
-
-  const handleRefreshToken = async () => {
-    await refreshToken();
-    refetch();
   };
 
   const formatDate = (dateString) => {
@@ -66,14 +67,6 @@ const SageIntegration = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  const isTokenExpiringSoon = () => {
-    if (!tokenExpiry) return false;
-    const expiryDate = new Date(tokenExpiry);
-    const now = new Date();
-    const hoursUntilExpiry = (expiryDate - now) / (1000 * 60 * 60);
-    return hoursUntilExpiry < 24; // Less than 24 hours
   };
 
   if (isLoadingStatus) {
@@ -132,39 +125,32 @@ const SageIntegration = () => {
             >
               <div className="text-center py-8">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                  <ExternalLink className="w-8 h-8 text-gray-400" />
+                  <Key className="w-8 h-8 text-gray-400" />
                 </div>
                 <h4 className="text-lg font-medium text-gray-900 mb-2">
                   Connect to Sage
                 </h4>
                 <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                  Link your Sage account to automatically sync your company data
-                  and enable advanced features.
+                  Enter your Sage API key to automatically sync your company
+                  data and enable advanced features.
                 </p>
-
-                {authUrlError && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                    {authUrlError.data?.message ||
-                      "Failed to generate authorization URL"}
-                  </div>
-                )}
 
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleConnect}
-                  disabled={isLoadingAuthUrl}
+                  disabled={isConnecting}
                   className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoadingAuthUrl ? (
+                  {isConnecting ? (
                     <>
                       <Loader className="w-4 h-4 mr-2 animate-spin" />
-                      Preparing connection...
+                      Connecting...
                     </>
                   ) : (
                     <>
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Connect to Sage
+                      <Key className="w-4 h-4 mr-2" />
+                      Connect with API Key
                     </>
                   )}
                 </motion.button>
@@ -177,7 +163,7 @@ const SageIntegration = () => {
               className="space-y-6"
             >
               {/* Connection Status */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-2 mb-2">
                     <Building className="w-4 h-4 text-gray-600" />
@@ -201,64 +187,13 @@ const SageIntegration = () => {
                     </span>
                   </div>
                   <p className="text-gray-900 font-medium">
-                    {formatDate(connectionDate)}
-                  </p>
-                </div>
-
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Shield className="w-4 h-4 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700">
-                      Token Status
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {isTokenExpiringSoon() ? (
-                      <>
-                        <AlertCircle className="w-4 h-4 text-orange-500" />
-                        <span className="text-orange-600 text-sm font-medium">
-                          Expires Soon
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="w-4 h-4 text-emerald-500" />
-                        <span className="text-emerald-600 text-sm font-medium">
-                          Valid
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    Until: {formatDate(tokenExpiry)}
+                    {formatDate(connectedAt)}
                   </p>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div className="flex items-center space-x-3">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleRefreshToken}
-                    disabled={isRefreshing}
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                  >
-                    {isRefreshing ? (
-                      <>
-                        <Loader className="w-4 h-4 mr-2 animate-spin" />
-                        Refreshing...
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Refresh Token
-                      </>
-                    )}
-                  </motion.button>
-                </div>
-
+              <div className="flex items-center justify-end pt-4 border-t border-gray-100">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -307,6 +242,14 @@ const SageIntegration = () => {
           )}
         </div>
       )}
+
+      {/* Credentials Modal */}
+      <SageCredentialsModal
+        isOpen={isApiKeyModalOpen}
+        onClose={handleCloseApiKeyModal}
+        onConnect={handleApiKeyConnect}
+        isLoading={isConnecting}
+      />
 
       {/* Disconnect Confirmation Modal */}
       <AnimatePresence>
